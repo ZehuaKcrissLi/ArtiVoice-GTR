@@ -4,7 +4,7 @@ import re
 from collections import Counter
 
 # 获取所有文件名
-file_path = "/home/kcriss/artivoice/picked_sliced"
+file_path = "/storageNVME/kcriss/picked_sliced"
 files = [f for f in os.listdir(file_path) if f.endswith('.wav')]
 
 # 初始化G, T, R列表
