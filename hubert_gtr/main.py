@@ -16,8 +16,8 @@ import torch
 import torchaudio
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import f1_score, precision_score, recall_score
-from model import GTRClassifier_G, GTRClassifier_T, GTRClassifier_R
-# from model import LinearClassifier
+from model import GTRClassifier
+
 from transformers import (
     Wav2Vec2FeatureExtractor,
     HubertModel,
@@ -127,7 +127,7 @@ class AudioDataset(Dataset):
         return padded_features, labels_tensor
 
 
-def train(model, train_loader, test_loader, num_epochs, optimizer, scheduler, device, model_save_path, GTR='G'):
+def train(model, train_loader, test_loader, num_epochs, optimizer, scheduler, device, model_save_path, GTR):
     # set up loss function with weighted loss
     loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -209,9 +209,10 @@ def train(model, train_loader, test_loader, num_epochs, optimizer, scheduler, de
             # Write accuracy to TensorBoard
             summary_writer.add_scalar('Accuracy/test', accuracy, epoch)
 
-        # save the model
-        torch.save(model.state_dict(), os.path.join(
-            model_save_path, f"model_{epoch}.pth"))
+        # save the model every 10 epochs
+        if epoch % 10 == 0:
+            torch.save(model.state_dict(), os.path.join(
+                model_save_path, f"model_{epoch}.pth"))
 
         # update the learning rate
         scheduler.step()
@@ -237,7 +238,7 @@ if __name__ == "__main__":
     parser.add_argument("--feature_path", type=str,
                         default="/storageNVME/kcriss/picked_sliced_features")
     parser.add_argument("--gtr", type=str, default="G")
-
+    parser.add_argument('--device', type=int, choices=[0,1,2,3], default=0)
     args = parser.parse_args()
 
     if args.extract_features:
@@ -267,10 +268,9 @@ if __name__ == "__main__":
                                  shuffle=False, collate_fn=AudioDataset.collation_fn)
 
     # set device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    device = torch.device(f"cuda:{args.device}")
     # set model
-    model = GTRClassifier_G(model_path=args.model_path,
+    model = GTRClassifier(model_path=args.model_path,
                             num_classes=args.num_classes)
 
     # set up optimizer and scheduler

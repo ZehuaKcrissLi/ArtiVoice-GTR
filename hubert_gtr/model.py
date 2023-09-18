@@ -2,9 +2,9 @@ from transformers import Wav2Vec2FeatureExtractor, HubertModel
 import torch.nn as nn
 import torch
 
-class GTRClassifier_G(nn.Module):
+class GTRClassifier(nn.Module):
     def __init__(self, model_path, num_classes):
-        super(GTRClassifier_G, self).__init__()
+        super(GTRClassifier, self).__init__()
         
         self.hubert_model = HubertModel.from_pretrained(model_path)
         
