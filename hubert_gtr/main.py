@@ -69,9 +69,9 @@ class AudioDataset(Dataset):
 
         for file in file_lists:
 
-            basename = os.path.basename(file)  # 获取文件名
-            basename = basename.split('_')[0]  # 获取下划线前的部分
-            digits = re.findall(r'\d', basename)  # 提取所有数字
+            basename = os.path.basename(file)  
+            basename = basename.split('_')[0]  
+            digits = re.findall(r'\d', basename)  
             if self.GTR == 'G':
                 cur_label = int(digits[-3])
             elif self.GTR == 'T':
