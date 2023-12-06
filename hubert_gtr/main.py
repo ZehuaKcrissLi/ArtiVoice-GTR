@@ -16,7 +16,9 @@ import torch
 import torchaudio
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import f1_score, precision_score, recall_score
-from model import GTRClassifier
+from model import GTRClassifier, GTRRegressor
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from transformers import (
     Wav2Vec2FeatureExtractor,
@@ -220,6 +222,113 @@ def train(model, train_loader, test_loader, num_epochs, optimizer, scheduler, de
     # Close the SummaryWriter
     summary_writer.close()
 
+def train_reg(model, train_loader, test_loader, num_epochs, optimizer, scheduler, device, model_save_path, GTR):
+    # set up loss function as regression
+    loss_fn = torch.nn.MSELoss()
+
+    # create a SummaryWriter for TensorBoard logging
+    summary_writer = SummaryWriter(log_dir=f'logs/{GTR}')
+
+    # train the model
+    for epoch in range(num_epochs):
+        # train the model
+        model.set_training(True)
+        for wave_feat, labels in train_loader:
+            # set to device
+            wave_feat = wave_feat.to(device)
+            labels = labels.to(device).float()
+
+            # get the output
+            outputs = model(wave_feat).float()
+
+            # calculate the loss
+            loss = loss_fn(outputs, labels)
+
+            # backprop
+            loss.backward()
+
+            # update the parameters
+            optimizer.step()
+
+            # zero grad
+            optimizer.zero_grad()
+
+            # Write loss to TensorBoard
+            iteration = epoch * len(train_loader) + len(train_loader)
+            summary_writer.add_scalar('Loss/train', loss.item(), iteration)
+
+        # validate the model
+        model.set_training(False)
+        with torch.no_grad():
+            correct = 0
+            total = 0
+            all_preds = []
+            all_labels = []
+            for wave_feat, labels in test_loader:
+                # set to device
+                wave_feat = wave_feat.to(device)
+                labels = labels.to(device)
+
+                # get the output
+                outputs = model(wave_feat).squeeze(1)
+
+                # get predicted output and find nearest integer
+                predicted = torch.round(outputs)
+
+                # get the accuracy
+                total += labels.size(0)
+                all_preds.extend(predicted.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+                
+                
+                correct += (predicted == labels).sum().item()
+
+            accuracy = correct / total
+            # calculate the f1 score
+            f1 = f1_score(all_labels, all_preds, average='macro')
+            # calculate the precision
+            precision = precision_score(all_labels, all_preds, average='macro')
+            # calculate the recall
+            recall = recall_score(all_labels, all_preds, average='macro')
+            # Write f1 score to TensorBoard
+            summary_writer.add_scalar('F1/test', f1, epoch)
+            # Write precision to TensorBoard
+            summary_writer.add_scalar('Precision/test', precision, epoch)
+            # Write recall to TensorBoard
+            summary_writer.add_scalar('Recall/test', recall, epoch)
+
+            # get the confusion matrix of the predictions
+            confusion_matrix = pd.crosstab(pd.Series(all_labels), pd.Series(all_preds), rownames=['True'], colnames=['Predicted'], margins=True)
+
+            plt.figure(figsize=(10, 7))
+            sns.heatmap(confusion_matrix, annot=True, fmt='g')
+            plt.title('Confusion Matrix')
+            fig = plt.gcf()
+
+            # 使用TensorBoard记录图表
+            summary_writer.add_figure('Confusion Matrix', fig, epoch)
+
+            # 清除当前图表，避免重叠绘制
+            plt.clf()
+
+            
+            print(f"Epoch: {epoch}, Loss: {loss.item()}, Accuracy: {accuracy}, F1: {f1}, Precision: {precision}, Recall: {recall}")
+                
+
+
+            # Write accuracy to TensorBoard
+            summary_writer.add_scalar('Accuracy/test', accuracy, epoch)
+
+        # save the model every 10 epochs
+        if epoch % 10 == 0:
+            torch.save(model.state_dict(), os.path.join(
+                model_save_path, f"model_{epoch}.pth"))
+
+        # update the learning rate
+        scheduler.step()
+
+    # Close the SummaryWriter
+    summary_writer.close()
 
 if __name__ == "__main__":
 
@@ -270,8 +379,9 @@ if __name__ == "__main__":
     # set device
     device = torch.device(f"cuda:{args.device}")
     # set model
-    model = GTRClassifier(model_path=args.model_path,
-                            num_classes=args.num_classes)
+    # model = GTRClassifier(model_path=args.model_path,
+    #                         num_classes=args.num_classes)
+    model = GTRRegressor(model_path=args.model_path)
 
     # set up optimizer and scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
@@ -281,9 +391,6 @@ if __name__ == "__main__":
     # set model to device
     model = model.to(device)
 
-    # set up loss function with weighted loss
-    loss_fn = torch.nn.CrossEntropyLoss()
-
     # train the model
-    train(model, train_dataloader, test_dataloader, args.num_epochs,
+    train_reg(model, train_dataloader, test_dataloader, args.num_epochs,
           optimizer, scheduler, device, args.model_save_path, GTR=args.gtr)
