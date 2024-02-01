@@ -2,3 +2,7 @@ picked_sliced/
 *.0
 *.pth
 *.pyc
+GTR-3D-plot-test.html
+.gitignore
+kcriss.code-workspace
+prepare_wav.sh

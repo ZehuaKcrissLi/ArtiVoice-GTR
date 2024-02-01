@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from dataset import AudioDataset
 import soundfile as sf
+import librosa
 from pathlib import Path
 import numpy as np
 import argparse
@@ -13,53 +14,51 @@ import glob
 import numpy as np
 import pandas as pd
 import torch
-import torchaudio
-from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import f1_score, precision_score, recall_score
-from model import GTRClassifier, GTRRegressor
 import matplotlib.pyplot as plt
-import seaborn as sns
-
-from transformers import (
-    Wav2Vec2FeatureExtractor,
-    HubertModel,
-)
+from feature_extractor import FeatureExtractor
+from natsort import natsorted
 
 
-def extract_features(model_path, data_path, feature_path, feature_extractor=None):
-
-    # check the existence of the feature path
+def extract_features(model_path, data_path, feature_path, feature_extractor):
+    # 检查特征路径是否存在，不存在则创建
     if not os.path.exists(feature_path):
         os.makedirs(feature_path)
 
-    if feature_extractor is None:
-        feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(
-            model_path)
+    data_path = '/storageNVME/kcriss/gtr-145'
 
-    # list all files under the data path
-    for folder in os.listdir(data_path):
-        folder_path = os.path.join(data_path, folder)
-        if os.path.isdir(folder_path):
-            # 遍历子文件夹中的所有文件
-            for filename in os.listdir(folder_path):
-                if not filename.endswith('.wav'):
-                    continue
-                # 获取完整的文件路径
-                wav_path = os.path.join(folder_path, filename)
+    features_folder_path = f'{data_path}-features'
+    if not os.path.exists(features_folder_path):
+        os.makedirs(features_folder_path)
 
-                # 使用torchaudio读取wav文件并降采样到16kHz
-                wav, sr = torchaudio.load(wav_path)
-                wav = torchaudio.transforms.Resample(sr, 16000)(wav)
+    # 使用glob和natsort获取所有wav文件的路径
+    wav_paths = natsorted(glob.glob(os.path.join(data_path, '**/*.wav'), recursive=True))
 
-        # get the input values
-        input_values = feature_extractor(
-            wav, sampling_rate=16000, return_tensors="pt").input_values.squeeze(0)
-
-        # convert pt to np
-        input_values = input_values.numpy()
-
-        # save the input values
-        np.save(os.path.join(feature_path, filename), input_values)
+    # 遍历每个wav文件
+    for wav_path in wav_paths:
+        # 加载wav文件
+        wav, sr = librosa.load(wav_path)
+        
+        # 提取特征
+        features = feature_extractor.extract_features(wav)
+        
+        # 分解路径以获取父目录名称和文件名称
+        parent_dir_name = os.path.basename(os.path.dirname(wav_path))
+        wav_file_name = os.path.basename(wav_path)
+        
+        # 从父目录名称提取最后三位数字
+        parent_dir_last_three_digits = parent_dir_name[-3:]
+        
+        # 构建特征文件名，将wav扩展名改为.npy
+        feature_file_name = parent_dir_last_three_digits + '_' + os.path.splitext(wav_file_name)[0] + '.npy'
+        
+        # 构建完整的特征文件路径
+        feature_file_path = os.path.join(features_folder_path, feature_file_name)
+        
+        # 保存特征
+        np.save(feature_file_path, features)
+    # # convert pt to np
+    # input_values = input_values.numpy()
 
 
 class AudioDataset(Dataset):
@@ -144,7 +143,6 @@ class AudioDataset(Dataset):
         labels_tensor = torch.tensor(labels, dtype=torch.long)
 
         return padded_features, labels_tensor
-
 
 def train(model, train_loader, test_loader, num_epochs, optimizer, scheduler, device, model_save_path, GTR):
     # set up loss function with weighted loss
@@ -238,115 +236,7 @@ def train(model, train_loader, test_loader, num_epochs, optimizer, scheduler, de
 
     # Close the SummaryWriter
     summary_writer.close()
-
-def train_reg(model, train_loader, test_loader, num_epochs, optimizer, scheduler, device, model_save_path, GTR):
-    # set up loss function as regression
-    loss_fn = torch.nn.MSELoss()
-
-    # create a SummaryWriter for TensorBoard logging
-    summary_writer = SummaryWriter(log_dir=f'logs/{GTR}')
-
-    # train the model
-    for epoch in range(num_epochs):
-        # train the model
-        model.set_training(True)
-        for wave_feat, labels in train_loader:
-            # set to device
-            wave_feat = wave_feat.to(device)
-            labels = labels.to(device).float()
-
-            # get the output
-            outputs = model(wave_feat).float()
-
-            # calculate the loss
-            loss = loss_fn(outputs, labels)
-
-            # backprop
-            loss.backward()
-
-            # update the parameters
-            optimizer.step()
-
-            # zero grad
-            optimizer.zero_grad()
-
-            # Write loss to TensorBoard
-            iteration = epoch * len(train_loader) + len(train_loader)
-            summary_writer.add_scalar('Loss/train', loss.item(), iteration)
-
-        # validate the model
-        model.set_training(False)
-        with torch.no_grad():
-            correct = 0
-            total = 0
-            all_preds = []
-            all_labels = []
-            for wave_feat, labels in test_loader:
-                # set to device
-                wave_feat = wave_feat.to(device)
-                labels = labels.to(device)
-
-                # get the output
-                outputs = model(wave_feat).squeeze(1)
-
-                # get predicted output and find nearest integer
-                predicted = torch.round(outputs)
-
-                # get the accuracy
-                total += labels.size(0)
-                all_preds.extend(predicted.cpu().numpy())
-                all_labels.extend(labels.cpu().numpy())
-                
-                
-                correct += (predicted == labels).sum().item()
-
-            accuracy = correct / total
-            # calculate the f1 score
-            f1 = f1_score(all_labels, all_preds, average='macro')
-            # calculate the precision
-            precision = precision_score(all_labels, all_preds, average='macro')
-            # calculate the recall
-            recall = recall_score(all_labels, all_preds, average='macro')
-            # Write f1 score to TensorBoard
-            summary_writer.add_scalar('F1/test', f1, epoch)
-            # Write precision to TensorBoard
-            summary_writer.add_scalar('Precision/test', precision, epoch)
-            # Write recall to TensorBoard
-            summary_writer.add_scalar('Recall/test', recall, epoch)
-
-            # get the confusion matrix of the predictions
-            confusion_matrix = pd.crosstab(pd.Series(all_labels), pd.Series(all_preds), rownames=['True'], colnames=['Predicted'], margins=True)
-
-            plt.figure(figsize=(10, 7))
-            sns.heatmap(confusion_matrix, annot=True, fmt='g')
-            plt.title('Confusion Matrix')
-            fig = plt.gcf()
-
-            # 使用TensorBoard记录图表
-            summary_writer.add_figure('Confusion Matrix', fig, epoch)
-
-            # 清除当前图表，避免重叠绘制
-            plt.clf()
-
-            
-            print(f"Epoch: {epoch}, Loss: {loss.item()}, Accuracy: {accuracy}, F1: {f1}, Precision: {precision}, Recall: {recall}")
-                
-
-
-            # Write accuracy to TensorBoard
-            summary_writer.add_scalar('Accuracy/test', accuracy, epoch)
-
-        # save the model every 10 epochs
-        if epoch % 10 == 0:
-            torch.save(model.state_dict(), os.path.join(
-                model_save_path, f"model_{epoch}.pth"))
-
-        # update the learning rate
-        scheduler.step()
-
-    # Close the SummaryWriter
-    summary_writer.close()
-
+    
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -367,8 +257,10 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=int, choices=[0,1,2,3], default=0)
     args = parser.parse_args()
 
+    feature_extractor = FeatureExtractor()
+    
     if args.extract_features:
-        extract_features(args.model_path, args.data_path, args.feature_path)
+        extract_features(args.model_path, args.data_path, args.feature_pat, feature_extractor)
     if not os.path.exists(args.model_save_path):
         os.makedirs(args.model_save_path)
     if args.gtr == 'G':
