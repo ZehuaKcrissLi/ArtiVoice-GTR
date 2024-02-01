@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 
 class FeatureExtractor:
-    def __init__(self, audio_path, sr=22050):
+    def __init__(self, sr=22050):
         self.sr = sr
 
     def extract_features(self, y, sr=22050):
@@ -17,7 +17,7 @@ class FeatureExtractor:
         mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
 
         # extract mel
-        mel = librosa.feature.melspectrogram(y=y, sr=sr)s
+        mel = librosa.feature.melspectrogram(y=y, sr=sr)
 
         # extract contrast
         contrast = librosa.feature.spectral_contrast(y=y, sr=sr)

@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
@@ -260,7 +259,7 @@ if __name__ == "__main__":
     feature_extractor = FeatureExtractor()
     
     if args.extract_features:
-        extract_features(args.model_path, args.data_path, args.feature_pat, feature_extractor)
+        extract_features(args.model_path, args.data_path, args.feature_path, feature_extractor)
     if not os.path.exists(args.model_save_path):
         os.makedirs(args.model_save_path)
     if args.gtr == 'G':
