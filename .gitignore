@@ -17,6 +17,7 @@ audio-slicer/*
 /home/kcriss/artivoice/t5_tokenizer_test.py
 /home/kcriss/artivoice/tokenization_test.py
 /home/kcriss/artivoice/whisper_transcribe.py
-/home/kcriss/artivoice/label_verification/
+/home/kcriss/artivoice/label_verification/*
 label_verification/label_verify.csv
 label_verification/label_verify.ipynb
+
