@@ -1,3 +1,6 @@
+__pychache__/*
+Models/*
+
 picked_sliced/
 *.0
 *.pth

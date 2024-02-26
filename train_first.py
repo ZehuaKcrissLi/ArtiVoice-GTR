@@ -113,7 +113,8 @@ def main(config_path):
 
     if config.get('pretrained_model', '') != '':
         model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
-                                    load_only_params=config.get('load_only_params', True))
+                                    load_only_params=config.get('load_only_params', True), 
+                                    load_predictor=False)  # predictor is not used in the first stage, will be loaded in the second stage
     else:
         start_epoch = 0
         iters = 0

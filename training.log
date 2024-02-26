@@ -1,1 +1,9 @@
 v1.0 train from scratch with aishell3 only, currently on first stage
+v2.0 finetune libritts model on aishell3, currently on first stage, TMA start from epoch 1
+
+1. (v1.0) aishell3 -> gtr w/ control input
+2. libri -> aishell3 -> gtr w/ control input
+3. libri -> gtr -> gtr w/ control input
+4. libri -> gtr w/ control input
+
+? original libri ckpt performace not good
