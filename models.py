@@ -157,6 +157,33 @@ class StyleEncoder(nn.Module):
     
         return s
 
+
+class GTRStyleEncoder(nn.Module):
+    def __init__(self, out_dim=128, style_dim=128):
+        super().__init__()
+        self.g_embedding = nn.Embedding(5, style_dim)
+        self.t_embedding = nn.Embedding(6, style_dim)
+        self.r_embedding = nn.Embedding(7, style_dim)
+
+        self.fc1 = nn.Linear(style_dim * 3, (out_dim + style_dim * 3) // 2)
+        self.fc2 = nn.Linear((out_dim + style_dim * 3) // 2, out_dim)
+
+    def forward(self, x):
+        r = x % 10
+        t = (x // 10) % 10
+        g = (x // 100) % 10
+
+        g_embeded = self.g_embedding(g)
+        t_embeded = self.t_embedding(t)
+        r_embeded = self.r_embedding(r)
+        
+        s = torch.cat([g_embeded, t_embeded, r_embeded], axis=1)
+        s = self.fc1(s)
+        s = self.fc2(s)
+
+        return s
+    
+
 class LinearNorm(torch.nn.Module):
     def __init__(self, in_dim, out_dim, bias=True, w_init_gain='linear'):
         super(LinearNorm, self).__init__()
@@ -758,11 +785,13 @@ def load_ASR_models(ASR_MODEL_PATH, ASR_MODEL_CONFIG):
     return asr_model
 
 def build_model(args, text_aligner, pitch_extractor):
-
     decoder = Decoder(dim_in=args.hidden_dim, style_dim=args.style_dim, dim_out=args.n_mels)
     text_encoder = TextEncoder(channels=args.hidden_dim, kernel_size=5, depth=args.n_layer, n_symbols=args.n_token)
     predictor = ProsodyPredictor(n_prods=7, prod_embd=128, style_dim=args.style_dim, d_hid=args.hidden_dim, nlayers=args.n_layer, dropout=args.dropout)
-    style_encoder = StyleEncoder(dim_in=args.dim_in, style_dim=args.style_dim, max_conv_dim=args.hidden_dim)
+    if args.gtr_condition:
+        style_encoder = GTRStyleEncoder(out_dim=args.style_dim, style_dim=args.style_dim)
+    else:
+        style_encoder = StyleEncoder(dim_in=args.dim_in, style_dim=args.style_dim, max_conv_dim=args.hidden_dim)
     discriminator = Discriminator2d(dim_in=args.dim_in, num_domains=1, max_conv_dim=args.hidden_dim)
         
     nets = Munch(predictor=predictor,
@@ -791,12 +820,15 @@ def build_model_old(args, text_aligner, pitch_extractor):
                 discriminator=discriminator)
     return nets
 
-def load_checkpoint(model, optimizer, path, load_only_params=True, load_predictor=True):
+def load_checkpoint(model, optimizer, path, load_only_params=True, load_predictor=True, load_style_encoder=True):
     state = torch.load(path, map_location='cpu')
     params = state['net']
     for key in model:
         if key in params:
             if key == "predictor" and load_predictor is False:
+                print('%s is NOT loaded' % key)
+                continue
+            if key == "style_encoder" and load_style_encoder is False:
                 print('%s is NOT loaded' % key)
                 continue
             model[key].load_state_dict(params[key])

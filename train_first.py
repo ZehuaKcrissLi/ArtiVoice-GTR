@@ -67,14 +67,19 @@ def main(config_path):
     multigpu = config.get('multigpu', False)
     log_interval = config.get('log_interval', 10)
     saving_epoch = config.get('save_freq', 2)
+    gtr_condition = config.get('model_params').get('gtr_condition', False)
 
     # load data
     train_list, val_list = get_data_path_list(train_path, val_path)
+
+    if gtr_condition:
+        collate_config = {"return_wave": True}
 
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
                                         num_workers=8,
                                         dataset_config={},
+                                        collate_config=collate_config,
                                         device=device)
 
     val_dataloader = build_dataloader(val_list,
@@ -82,6 +87,7 @@ def main(config_path):
                                       validation=True,
                                       num_workers=2,
                                       device=device,
+                                      collate_config=collate_config,
                                       dataset_config={})
     # load pretrained ASR model
     ASR_config = config.get('ASR_config', False)
@@ -110,11 +116,13 @@ def main(config_path):
     if multigpu:
         for key in model:
             model[key] = MyDataParallel(model[key])
-
+            
     if config.get('pretrained_model', '') != '':
         model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
                                     load_only_params=config.get('load_only_params', True), 
-                                    load_predictor=False)  # predictor is not used in the first stage, will be loaded in the second stage
+                                    load_predictor=False,
+                                    load_style_encoder=False if gtr_condition else True,
+                                    )  
     else:
         start_epoch = 0
         iters = 0
@@ -135,9 +143,12 @@ def main(config_path):
         _ = [model[key].train() for key in model]
 
         for i, batch in enumerate(train_dataloader):
-
+            
             batch = [b.to(device) for b in batch]
-            texts, input_lengths, mels, mel_input_length, tones = batch
+            if gtr_condition:
+                paths, texts, input_lengths, mels, mel_input_length, tones = batch
+            else:
+                texts, input_lengths, mels, mel_input_length, tones = batch
             
             mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to(device)
             m = length_to_mask(input_lengths)
@@ -198,7 +209,11 @@ def main(config_path):
 
             real_norm = log_norm(gt.unsqueeze(1)).squeeze(1).detach()
             F0_real, _, _ = model.pitch_extractor(gt.unsqueeze(1))
-            s = model.style_encoder(gt.unsqueeze(1))
+            if gtr_condition:
+                s = model.style_encoder(paths)
+            else:
+                s = model.style_encoder(gt.unsqueeze(1))
+            # print(s.shape) torch.Size([2, 384])
 
             # reconstruction
             mel_rec = model.decoder(en, F0_real, real_norm, s)
@@ -291,7 +306,10 @@ def main(config_path):
             for batch_idx, batch in enumerate(val_dataloader):
                 optimizer.zero_grad()
 
-                batch = [b.to(device) for b in batch]
+            batch = [b.to(device) for b in batch]
+            if gtr_condition:
+                paths, texts, input_lengths, mels, mel_input_length, tones = batch
+            else:
                 texts, input_lengths, mels, mel_input_length, tones = batch
 
                 with torch.no_grad():
@@ -345,7 +363,10 @@ def main(config_path):
                     F0 = F0.reshape(F0.shape[0], F0.shape[1] * 2, F0.shape[2], 1).squeeze()
 
                 # reconstruct
-                s = model.style_encoder(gt.unsqueeze(1))
+                if gtr_condition:
+                    s = model.style_encoder(paths)
+                else:
+                    s = model.fstyle_encoder(gt.unsqueeze(1))
                 real_norm = log_norm(gt.unsqueeze(1)).squeeze(1)
                 mel_rec = model.decoder(en, F0_real, real_norm, s)
                 mel_rec = mel_rec[..., :gt.shape[-1]]

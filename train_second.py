@@ -85,14 +85,19 @@ def main(config_path):
     multigpu = config.get('multigpu', False)
     log_interval = config.get('log_interval', 10)
     saving_epoch = config.get('save_freq', 2)
+    gtr_condition = config.get('model_params').get('gtr_condition', False)
 
     # load data
     train_list, val_list = get_data_path_list(train_path, val_path)
+
+    if gtr_condition:
+        collate_config = {"return_wave": True}
 
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
                                         num_workers=8,
                                         dataset_config={},
+                                        collate_config=collate_config,
                                         device=device)
 
     val_dataloader = build_dataloader(val_list,
@@ -100,6 +105,7 @@ def main(config_path):
                                       validation=True,
                                       num_workers=2,
                                       device=device,
+                                      collate_config=collate_config,
                                       dataset_config={})
     # load pretrained ASR model
     ASR_config = config.get('ASR_config', False)
@@ -128,11 +134,13 @@ def main(config_path):
     if multigpu:
         for key in model:
             model[key] = MyDataParallel(model[key])
-        
+    
     if config.get('pretrained_model', '') != '' and config.get('second_stage_load_pretrained', False):
         model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
                                     load_only_params=config.get('load_only_params', True), 
-                                    load_predictor=config.get('load_only_params', False))
+                                    load_predictor=config.get('load_only_params', False),
+                                    load_style_encoder=(False if gtr_condition else True),
+                                    )
     else:
         start_epoch = 0
         iters = 0
@@ -141,7 +149,9 @@ def main(config_path):
             first_stage_path = osp.join(log_dir, config.get('first_stage_path', 'first_stage.pth'))
             print('Loading the first stage model at %s ...' % first_stage_path)
             model, optimizer, start_epoch, iters = load_checkpoint(model, optimizer, first_stage_path,
-                                        load_only_params=True, load_predictor=config.get('load_only_params', False))
+                                        load_only_params=True, load_predictor=config.get('load_only_params', False),
+                                        load_style_encoder=(False if gtr_condition else True),
+                                        )
         else:
             raise ValueError('You need to specify the path to the first stage model.') 
 
@@ -166,7 +176,10 @@ def main(config_path):
         for i, batch in enumerate(train_dataloader):
 
             batch = [b.to(device) for b in batch]
-            texts, input_lengths, mels, mel_input_length, tones = batch
+            if gtr_condition:
+                paths, texts, input_lengths, mels, mel_input_length, tones = batch
+            else:
+                texts, input_lengths, mels, mel_input_length, tones = batch
 
             with torch.no_grad():
                 mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to('cuda')
@@ -200,16 +213,19 @@ def main(config_path):
                 asr = (t_en @ s2s_attn_mono)
 
                 d_gt = s2s_attn_mono.sum(axis=-1).detach()
-
-                # compute the style of the entire utterance
-                # this operation cannot be done in batch because of the avgpool layer (may need to work on masked avgpool)
-                ss = []
-                for bib in range(len(mel_input_length)):
-                    mel_length = int(mel_input_length[bib].item())
-                    mel = mels[bib, :, :mel_input_length[bib]]
-                    s = model.style_encoder(mel.unsqueeze(0).unsqueeze(1))
-                    ss.append(s)
-                s = torch.stack(ss).squeeze()
+                
+                if gtr_condition:
+                    s = model.style_encoder(paths)
+                else:
+                    # compute the style of the entire utterance
+                    # this operation cannot be done in batch because of the avgpool layer (may need to work on masked avgpool)
+                    ss = []
+                    for bib in range(len(mel_input_length)):
+                        mel_length = int(mel_input_length[bib].item())
+                        mel = mels[bib, :, :mel_input_length[bib]]
+                        s = model.style_encoder(mel.unsqueeze(0).unsqueeze(1))
+                        ss.append(s)
+                    s = torch.stack(ss).squeeze()
             
             d, _ = model.predictor(t_en, 
                                    tones,
@@ -289,7 +305,10 @@ def main(config_path):
                 continue
 
             with torch.no_grad():
-                s = model.style_encoder(gt.unsqueeze(1))
+                if gtr_condition:
+                    s = model.style_encoder(paths)
+                else:
+                    s = model.style_encoder(gt.unsqueeze(1))
 
                 F0_real, _, F0 = model.pitch_extractor(gt.unsqueeze(1))
                 F0 = F0.reshape(F0.shape[0], F0.shape[1] * 2, F0.shape[2], 1).squeeze()
@@ -410,15 +429,18 @@ def main(config_path):
 
                     d_gt = s2s_attn_mono.sum(axis=-1).detach()
 
-                # compute the style of the entire utterance
-                # this operation cannot be done in batch because of the avgpool layer (may need to work on masked avgpool)
-                ss = []
-                for bib in range(len(mel_input_length)):
-                    mel_length = int(mel_input_length[bib].item())
-                    mel = mels[bib, :, :mel_input_length[bib]]
-                    s = model.style_encoder(mel.unsqueeze(0).unsqueeze(1))
-                    ss.append(s)
-                s = torch.stack(ss).squeeze()
+                if gtr_condition:
+                    s = model.style_encoder(paths)
+                else:
+                    # compute the style of the entire utterance
+                    # this operation cannot be done in batch because of the avgpool layer (may need to work on masked avgpool)
+                    ss = []
+                    for bib in range(len(mel_input_length)):
+                        mel_length = int(mel_input_length[bib].item())
+                        mel = mels[bib, :, :mel_input_length[bib]]
+                        s = model.style_encoder(mel.unsqueeze(0).unsqueeze(1))
+                        ss.append(s)
+                    s = torch.stack(ss).squeeze()
                 
                 d, p = model.predictor(t_en, s, tones,
                                                     input_lengths, 
@@ -444,7 +466,10 @@ def main(config_path):
                 p_en = torch.stack(p_en)
                 gt = torch.stack(gt).detach()
 
-                s = model.style_encoder(gt.unsqueeze(1))
+                if gtr_condition:
+                    s = model.style_encoder(paths)
+                else:
+                    s = model.style_encoder(gt.unsqueeze(1))
 
                 F0_fake, N_fake = model.predictor.F0Ntrain(p_en, s)
 
