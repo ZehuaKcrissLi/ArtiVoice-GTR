@@ -228,7 +228,6 @@ class Collater(object):
 
 def build_dataloader(path_list,
                      validation=False,
-                     batch_size=4,
                      num_workers=1,
                      device='cpu',
                      collate_config={},
