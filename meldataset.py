@@ -230,6 +230,7 @@ def build_dataloader(path_list,
                      validation=False,
                      num_workers=1,
                      device='cpu',
+                     batch_size=8,
                      collate_config={},
                      dataset_config={}):
     
