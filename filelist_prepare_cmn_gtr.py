@@ -60,7 +60,7 @@ def main():
     with open("Data/gtr_train.txt", 'w', encoding='utf-8') as f:
         f.write("\n".join(new_lines))
     with open("Data/gtr_test.txt", 'w', encoding='utf-8') as f:
-        f.write("\n".join(new_lines[:32]))
+        f.write("\n".join(new_lines[:100]))
 
 
 if __name__ == '__main__':

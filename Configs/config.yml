@@ -1,4 +1,5 @@
-log_dir: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1"
+# log_dir: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1"
+log_dir: "/storageNVME/melissa/ckpts/stylettsCN/debug"
 first_stage_path: "first_stage.pth"
 # log_dir: "/storageNVME/melissa/ckpts/libritts_aishell3_s2"
 # first_stage_path: "libritts_aishell3_s1-epoch_1st_00016.pth"

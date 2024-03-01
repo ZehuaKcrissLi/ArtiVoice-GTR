@@ -312,69 +312,69 @@ def main(config_path):
             else:
                 texts, input_lengths, mels, mel_input_length, tones = batch
 
-                with torch.no_grad():
-                    mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to(device)
-                    m = length_to_mask(input_lengths)
-                    ppgs, s2s_pred, s2s_attn_feat = model.text_aligner(mels, mask, texts)
+            with torch.no_grad():
+                mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to(device)
+                m = length_to_mask(input_lengths)
+                ppgs, s2s_pred, s2s_attn_feat = model.text_aligner(mels, mask, texts)
 
-                    s2s_attn_feat = s2s_attn_feat.transpose(-1, -2)
-                    s2s_attn_feat = s2s_attn_feat[..., 1:]
-                    s2s_attn_feat = s2s_attn_feat.transpose(-1, -2)
-
-                    with torch.no_grad():
-                        text_mask = length_to_mask(input_lengths).to(texts.device)
-                        attn_mask = (~mask).unsqueeze(-1).expand(mask.shape[0], mask.shape[1], text_mask.shape[-1]).float().transpose(-1, -2)
-                        attn_mask = attn_mask.float() * (~text_mask).unsqueeze(-1).expand(text_mask.shape[0], text_mask.shape[1], mask.shape[-1]).float()
-                        attn_mask = (attn_mask < 1)
-
-                    s2s_attn_feat.masked_fill_(attn_mask, -float("inf"))
-
-                    if TMA_CEloss:
-                        s2s_attn = F.softmax(s2s_attn_feat, dim=1) # along the mel dimension
-                    else:
-                        s2s_attn = F.softmax(s2s_attn_feat, dim=-1) # along the text dimension
-
-                    # get monotonic version 
-                    with torch.no_grad():
-                        mask_ST = mask_from_lens(s2s_attn, input_lengths, mel_input_length // (2 ** model.text_aligner.n_down))
-                        s2s_attn_mono = maximum_path(s2s_attn, mask_ST)
-
-                    s2s_attn = torch.nan_to_num(s2s_attn)
-
-                # encode
-                t_en = model.text_encoder(texts, input_lengths, m)
-                asr = (t_en @ s2s_attn_mono)
-
-                # get clips
-                mel_len = int(mel_input_length.min().item() / 2 - 1)
-                en = []
-                gt = []
-                for bib in range(len(mel_input_length)):
-                    mel_length = int(mel_input_length[bib].item() / 2)
-
-                    random_start = np.random.randint(0, mel_length - mel_len)
-                    en.append(asr[bib, :, random_start:random_start+mel_len])
-                    gt.append(mels[bib, :, (random_start * 2):((random_start+mel_len) * 2)])
-                en = torch.stack(en)
-                gt = torch.stack(gt).detach()
+                s2s_attn_feat = s2s_attn_feat.transpose(-1, -2)
+                s2s_attn_feat = s2s_attn_feat[..., 1:]
+                s2s_attn_feat = s2s_attn_feat.transpose(-1, -2)
 
                 with torch.no_grad():
-                    F0_real, _, F0 = model.pitch_extractor(gt.unsqueeze(1))
-                    F0 = F0.reshape(F0.shape[0], F0.shape[1] * 2, F0.shape[2], 1).squeeze()
+                    text_mask = length_to_mask(input_lengths).to(texts.device)
+                    attn_mask = (~mask).unsqueeze(-1).expand(mask.shape[0], mask.shape[1], text_mask.shape[-1]).float().transpose(-1, -2)
+                    attn_mask = attn_mask.float() * (~text_mask).unsqueeze(-1).expand(text_mask.shape[0], text_mask.shape[1], mask.shape[-1]).float()
+                    attn_mask = (attn_mask < 1)
 
-                # reconstruct
-                if gtr_condition:
-                    s = model.style_encoder(paths)
+                s2s_attn_feat.masked_fill_(attn_mask, -float("inf"))
+
+                if TMA_CEloss:
+                    s2s_attn = F.softmax(s2s_attn_feat, dim=1) # along the mel dimension
                 else:
-                    s = model.fstyle_encoder(gt.unsqueeze(1))
-                real_norm = log_norm(gt.unsqueeze(1)).squeeze(1)
-                mel_rec = model.decoder(en, F0_real, real_norm, s)
-                mel_rec = mel_rec[..., :gt.shape[-1]]
+                    s2s_attn = F.softmax(s2s_attn_feat, dim=-1) # along the text dimension
 
-                loss_mel = criterion(mel_rec, gt)
+                # get monotonic version 
+                with torch.no_grad():
+                    mask_ST = mask_from_lens(s2s_attn, input_lengths, mel_input_length // (2 ** model.text_aligner.n_down))
+                    s2s_attn_mono = maximum_path(s2s_attn, mask_ST)
 
-                loss_test += loss_mel
-                iters_test += 1
+                s2s_attn = torch.nan_to_num(s2s_attn)
+
+            # encode
+            t_en = model.text_encoder(texts, input_lengths, m)
+            asr = (t_en @ s2s_attn_mono)
+
+            # get clips
+            mel_len = int(mel_input_length.min().item() / 2 - 1)
+            en = []
+            gt = []
+            for bib in range(len(mel_input_length)):
+                mel_length = int(mel_input_length[bib].item() / 2)
+
+                random_start = np.random.randint(0, mel_length - mel_len)
+                en.append(asr[bib, :, random_start:random_start+mel_len])
+                gt.append(mels[bib, :, (random_start * 2):((random_start+mel_len) * 2)])
+            en = torch.stack(en)
+            gt = torch.stack(gt).detach()
+
+            with torch.no_grad():
+                F0_real, _, F0 = model.pitch_extractor(gt.unsqueeze(1))
+                F0 = F0.reshape(F0.shape[0], F0.shape[1] * 2, F0.shape[2], 1).squeeze()
+
+            # reconstruct
+            if gtr_condition:
+                s = model.style_encoder(paths)
+            else:
+                s = model.fstyle_encoder(gt.unsqueeze(1))
+            real_norm = log_norm(gt.unsqueeze(1)).squeeze(1)
+            mel_rec = model.decoder(en, F0_real, real_norm, s)
+            mel_rec = mel_rec[..., :gt.shape[-1]]
+
+            loss_mel = criterion(mel_rec, gt)
+
+            loss_test += loss_mel
+            iters_test += 1
 
         print('Epochs:', epoch + 1)
         logger.info('Validation mel loss: %.3f' % (loss_test / iters_test))
