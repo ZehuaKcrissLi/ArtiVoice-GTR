@@ -1,8 +1,22 @@
-v1.0 train from scratch with aishell3 only, currently on first stage
+v1.0 train from scratch with aishell3 only
+[] first stage /storageNVME/melissa/ckpts/stylettsCN/aishell3_s1
+- some losses collapsed to zero: s2s@37357
+- check first stage synthesis result
+no s2s loss issue: epoch_1st_00008.pth, total: epoch_1st_00030.pth
+[] second stage
+
+
 v2.0 finetune libritts model on aishell3, currently on first stage, TMA start from epoch 1
+[] first stage /storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_s1
+- some losses collapsed to zero, need to check: 
+    adv: not converging from the begining
+    d_loss, mel_loss, s2s, all@67821
+- check first stage synthesis result
+no s2s loss issue: epoch_1st_00016.pth, total: epoch_1st_00024.pth
+[] second stage
 
 1. (v1.0) aishell3 -> gtr w/ control input
-2. libri -> aishell3 -> gtr w/ control input
+2. (v2.0) libri -> aishell3 -> gtr w/ control input
 3. libri -> gtr -> gtr w/ control input
 4. libri -> gtr w/ control input
 

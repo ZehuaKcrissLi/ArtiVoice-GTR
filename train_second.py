@@ -131,7 +131,8 @@ def main(config_path):
         
     if config.get('pretrained_model', '') != '' and config.get('second_stage_load_pretrained', False):
         model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
-                                    load_only_params=config.get('load_only_params', True))
+                                    load_only_params=config.get('load_only_params', True), 
+                                    load_predictor=config.get('load_only_params', False))
     else:
         start_epoch = 0
         iters = 0
@@ -140,7 +141,7 @@ def main(config_path):
             first_stage_path = osp.join(log_dir, config.get('first_stage_path', 'first_stage.pth'))
             print('Loading the first stage model at %s ...' % first_stage_path)
             model, optimizer, start_epoch, iters = load_checkpoint(model, optimizer, first_stage_path,
-                                        load_only_params=True)
+                                        load_only_params=True, load_predictor=config.get('load_only_params', False))
         else:
             raise ValueError('You need to specify the path to the first stage model.') 
 
@@ -165,7 +166,7 @@ def main(config_path):
         for i, batch in enumerate(train_dataloader):
 
             batch = [b.to(device) for b in batch]
-            texts, input_lengths, mels, mel_input_length = batch
+            texts, input_lengths, mels, mel_input_length, tones = batch
 
             with torch.no_grad():
                 mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to('cuda')
@@ -209,12 +210,17 @@ def main(config_path):
                     s = model.style_encoder(mel.unsqueeze(0).unsqueeze(1))
                     ss.append(s)
                 s = torch.stack(ss).squeeze()
+            
+            d, _ = model.predictor(t_en, 
+                                   tones,
+                                    s, 
+                                    input_lengths, 
+                                    s2s_attn_mono, 
+                                    m)
+            # text, prosody, style, text_length, alignment, m
+            # text,          style, text_length, alignment, m
 
-            # TODO
-            d, _ = model.predictor(t_en, s, 
-                                                    input_lengths, 
-                                                    s2s_attn_mono, 
-                                                    m)
+            
             # augmentation
             with torch.no_grad():
                 M = np.random.random()
@@ -256,8 +262,7 @@ def main(config_path):
                 # encode
                 asr = (t_en @ s2s_attn_mono)
 
-            # TODO
-            _, p = model.predictor(t_en, s, 
+            _, p = model.predictor(t_en, tones, s, 
                                                     input_lengths, 
                                                     s2s_attn_mono, 
                                                     m)
@@ -373,7 +378,7 @@ def main(config_path):
                 optimizer.zero_grad()
 
                 batch = [b.to(device) for b in batch]
-                texts, input_lengths, mels, mel_input_length = batch
+                texts, input_lengths, mels, mel_input_length, tones = batch
                 with torch.no_grad():
                     mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to('cuda')
                     text_mask = length_to_mask(input_lengths).to(texts.device)
@@ -415,7 +420,7 @@ def main(config_path):
                     ss.append(s)
                 s = torch.stack(ss).squeeze()
                 
-                d, p = model.predictor(t_en, s, 
+                d, p = model.predictor(t_en, s, tones,
                                                     input_lengths, 
                                                     s2s_attn_mono, 
                                                     m)

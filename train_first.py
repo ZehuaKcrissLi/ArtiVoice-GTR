@@ -137,9 +137,9 @@ def main(config_path):
         for i, batch in enumerate(train_dataloader):
 
             batch = [b.to(device) for b in batch]
-            texts, input_lengths, mels, mel_input_length = batch
-
-            mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to('cuda')
+            texts, input_lengths, mels, mel_input_length, tones = batch
+            
+            mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to(device)
             m = length_to_mask(input_lengths)
 
             text_mask = length_to_mask(input_lengths).to(texts.device)
@@ -202,6 +202,10 @@ def main(config_path):
 
             # reconstruction
             mel_rec = model.decoder(en, F0_real, real_norm, s)
+
+            # np.save("./synth/libritts_aishell3_s1-epoch_1st_00016-mel_rec.npy", mel_rec.cpu().detach().numpy())
+            # np.save("./synth/libritts_aishell3_s1-epoch_1st_00016-gt.npy", gt.cpu().detach().numpy())
+            # exit()
 
             # discriminator loss
             optimizer.zero_grad()
@@ -288,10 +292,10 @@ def main(config_path):
                 optimizer.zero_grad()
 
                 batch = [b.to(device) for b in batch]
-                texts, input_lengths, mels, mel_input_length = batch
+                texts, input_lengths, mels, mel_input_length, tones = batch
 
                 with torch.no_grad():
-                    mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to('cuda')
+                    mask = length_to_mask(mel_input_length // (2 ** model.text_aligner.n_down)).to(device)
                     m = length_to_mask(input_lengths)
                     ppgs, s2s_pred, s2s_attn_feat = model.text_aligner(mels, mask, texts)
 

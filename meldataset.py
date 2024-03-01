@@ -46,6 +46,26 @@ class TextCleaner:
                 print("Key Error: ", text)
         return indexes
 
+class TextCleaner4Tones:
+    def __init__(self, dummy=None):
+        self.word_index_dictionary = {
+            "X": 0,
+            "1": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            " ": 6,
+        }
+    def __call__(self, text):
+        indexes = []
+        for char in text:
+            try:
+                indexes.append(self.word_index_dictionary[char])
+            except KeyError:
+                print("Key Error: ", text)
+        return indexes
+
 np.random.seed(1)
 random.seed(1)
 SPECT_PARAMS = {
@@ -83,6 +103,7 @@ class FilePathDataset(torch.utils.data.Dataset):
         _data_list = [l.split('|') for l in data_list]
         self.data_list = [data if len(data) == 4 else (*data, 0) for data in _data_list]
         self.text_cleaner = TextCleaner()
+        self.text_cleaner4tones = TextCleaner4Tones()
         self.sr = sr
 
         self.to_melspec = torchaudio.transforms.MelSpectrogram(**MEL_PARAMS)
@@ -100,8 +121,8 @@ class FilePathDataset(torch.utils.data.Dataset):
         data = self.data_list[idx]
         path = data[0]
 
-        # wave, text_tensor, tone_tensor, speaker_id = self._load_tensor(data)
-        wave, text_tensor, speaker_id = self._load_tensor(data)
+        wave, text_tensor, tone_tensor, speaker_id = self._load_tensor(data)
+        # wave, text_tensor, speaker_id = self._load_tensor(data)
 
         mel_tensor = preprocess(wave).squeeze()
 
@@ -109,7 +130,9 @@ class FilePathDataset(torch.utils.data.Dataset):
         length_feature = acoustic_feature.size(1)
         acoustic_feature = acoustic_feature[:, :(length_feature - length_feature % 2)]
 
-        return speaker_id, acoustic_feature, text_tensor, path
+        # print(text_tensor.shape, text_tensor)
+        # print(tone_tensor.shape, tone_tensor)
+        return speaker_id, acoustic_feature, text_tensor, tone_tensor, path
 
     def _load_tensor(self, data):
         wave_path, text, tone, speaker_id = data
@@ -124,19 +147,19 @@ class FilePathDataset(torch.utils.data.Dataset):
         wave = np.concatenate([np.zeros([5000]), wave, np.zeros([5000])], axis=0)
 
         text = self.text_cleaner(text)
-        # tone = self.text_cleaner(tone)
+        tone = self.text_cleaner4tones(tone)
 
         text.insert(0, 0)
         text.append(0)
 
-        # tone.insert(0, 0)
-        # tone.append(0)
+        tone.insert(0, 0)
+        tone.append(0)
 
         text = torch.LongTensor(text)
-        # tone = torch.LongTensor(tone)
+        tone = torch.LongTensor(tone)
 
-        # return wave, text, tone, speaker_id
-        return wave, text, speaker_id
+        return wave, text, tone, speaker_id
+        # return wave, text, speaker_id
 
     def _load_data(self, data):
         wave, text_tensor, tone, speaker_id = self._load_tensor(data)
@@ -164,7 +187,7 @@ class Collater(object):
         
 
     def __call__(self, batch):
-        # batch[0] = wave, mel, text, f0, speakerid
+        # speaker_id, acoustic_feature, text_tensor, tone_tensor, path
         batch_size = len(batch)
 
         # sort by mel length
@@ -178,23 +201,27 @@ class Collater(object):
 
         mels = torch.zeros((batch_size, nmels, max_mel_length)).float()
         texts = torch.zeros((batch_size, max_text_length)).long()
+        tones = torch.zeros((batch_size, max_text_length)).long()
         input_lengths = torch.zeros(batch_size).long()
         output_lengths = torch.zeros(batch_size).long()
         paths = ['' for _ in range(batch_size)]
+
         
-        for bid, (label, mel, text, path) in enumerate(batch):
+        for bid, (label, mel, text, tone, path) in enumerate(batch):
             mel_size = mel.size(1)
             text_size = text.size(0)
             mels[bid, :, :mel_size] = mel
             texts[bid, :text_size] = text
+            tones[bid, :text_size] = tone
             input_lengths[bid] = text_size
             output_lengths[bid] = mel_size
             paths[bid] = path
+
             
         if self.return_wave:
             return paths, texts, input_lengths, mels, output_lengths
-            
-        return texts, input_lengths, mels, output_lengths
+        
+        return texts, input_lengths, mels, output_lengths, tones
 
 
 

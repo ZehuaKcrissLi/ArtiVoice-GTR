@@ -474,15 +474,15 @@ class AdaLayerNorm(nn.Module):
 
         self.fc = nn.Linear(style_dim, channels*2)
 
+
     def forward(self, x, s):
         x = x.transpose(-1, -2)
         x = x.transpose(1, -1)
-                
+        
         h = self.fc(s)
         h = h.view(h.size(0), h.size(1), 1)
         gamma, beta = torch.chunk(h, chunks=2, dim=1)
         gamma, beta = gamma.transpose(1, -1), beta.transpose(1, -1)
-        
         
         x = F.layer_norm(x, (self.channels,), eps=self.eps)
         x = (1 + gamma) * x + beta
@@ -506,12 +506,12 @@ class ProsodyPredictor(nn.Module):
         super().__init__()
         self.embedding = nn.Embedding(n_prods, prod_embd * 2)
         self.text_encoder = DurationEncoder(sty_dim=style_dim,
-                                            d_model=d_hid,
+                                            d_model=d_hid + prod_embd*2,
                                             nlayers=nlayers,
                                             dropout=dropout)
 
-        self.lstm = nn.LSTM(d_hid + style_dim, d_hid // 2, 1, batch_first=True, bidirectional=True)
-        self.duration_proj = LinearNorm(d_hid, 1)
+        # self.lstm = nn.LSTM(d_hid + style_dim, d_hid // 2, 1, batch_first=True, bidirectional=True)
+        # self.duration_proj = LinearNorm(d_hid, 1)
 
         self.lstm = nn.LSTM(d_hid + prod_embd * 2 + style_dim, d_hid // 2, 1, batch_first=True, bidirectional=True)
         self.duration_proj = LinearNorm(d_hid, 1)
@@ -531,7 +531,7 @@ class ProsodyPredictor(nn.Module):
         self.N_proj = nn.Conv1d(d_hid // 2, 1, 1, 1, 0)
 
     def forward(self, texts, prosody, style, text_lengths, alignment, m):
-        prosody = self.embedding(prosody)
+        prosody = self.embedding(prosody).permute(0, 2, 1)
         texts = torch.cat([texts, prosody], axis=1)
         d = self.text_encoder(texts, style, text_lengths, m)
 
@@ -540,6 +540,7 @@ class ProsodyPredictor(nn.Module):
 
         # predict duration
         input_lengths = text_lengths.cpu().numpy()
+        
         x = nn.utils.rnn.pack_padded_sequence(
             d, input_lengths, batch_first=True, enforce_sorted=False)
 
