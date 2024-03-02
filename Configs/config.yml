@@ -1,8 +1,6 @@
-# log_dir: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1"
 log_dir: "/storageNVME/melissa/ckpts/stylettsCN/debug"
 first_stage_path: "first_stage.pth"
-# log_dir: "/storageNVME/melissa/ckpts/libritts_aishell3_s2"
-# first_stage_path: "libritts_aishell3_s1-epoch_1st_00016.pth"
+
 save_freq: 2
 log_interval: 10
 device: "cuda"
@@ -10,15 +8,15 @@ multigpu: false
 epochs_1st: 200 # number of epochs for first stage training
 epochs_2nd: 100 # number of peochs for second stage training
 batch_size: 16
-pretrained_model: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1/libritts_aishell3_s1-epoch_1st_00016.pth"
+pretrained_model: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_s2/epoch_1st_00022.pth"
 # pretrained_model: ""
-second_stage_load_pretrained: false # set to true if the pre-trained model is for 2nd stage
-load_only_params: true # set to true if do not want to load epoch numbers and optimizer parametersr
+second_stage_load_pretrained: true # set to true if the pre-trained model is for 2nd stage
+load_only_params: false # set to true if do not want to load epoch numbers and optimizer parametersr
+load_predictor: true
+load_style_encoder: true
 
-train_data: "Data/gtr_train.txt"
-val_data: "Data/gtr_test.txt"
-# train_data: "Data/train_list_aishell3_renamed.txt"
-# val_data: "Data/val_list_aishell3_renamed.txt"
+train_data: "Data/train_list_aishell3_renamed.txt"
+val_data: "Data/val_list_aishell3_renamed.txt"
 
 F0_path: "Utils/JDC/bst.t7"
 ASR_config: "Utils/ASR/config.yml"
@@ -32,7 +30,7 @@ preprocess_params:
     hop_length: 300
 
 model_params:
-  gtr_condition: true
+  gtr_condition: false
   hidden_dim: 512
   n_token: 178
   style_dim: 128

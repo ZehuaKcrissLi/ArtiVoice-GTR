@@ -92,6 +92,8 @@ def main(config_path):
 
     if gtr_condition:
         collate_config = {"return_wave": True}
+    else:
+        collate_config = {}
 
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
@@ -136,10 +138,11 @@ def main(config_path):
             model[key] = MyDataParallel(model[key])
     
     if config.get('pretrained_model', '') != '' and config.get('second_stage_load_pretrained', False):
+        print('Loading the second stage model at %s ...' % config['pretrained_model'])
         model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
                                     load_only_params=config.get('load_only_params', True), 
-                                    load_predictor=config.get('load_only_params', False),
-                                    load_style_encoder=(False if gtr_condition else True),
+                                    load_predictor=config.get('load_predictor', False),
+                                    load_style_encoder=config.get('load_predictor', False),
                                     )
     else:
         start_epoch = 0
@@ -149,8 +152,8 @@ def main(config_path):
             first_stage_path = osp.join(log_dir, config.get('first_stage_path', 'first_stage.pth'))
             print('Loading the first stage model at %s ...' % first_stage_path)
             model, optimizer, start_epoch, iters = load_checkpoint(model, optimizer, first_stage_path,
-                                        load_only_params=True, load_predictor=config.get('load_only_params', False),
-                                        load_style_encoder=(False if gtr_condition else True),
+                                        load_only_params=True, load_predictor=config.get('load_predictor', False),
+                                    load_style_encoder=config.get('load_predictor', False),
                                         )
         else:
             raise ValueError('You need to specify the path to the first stage model.') 

@@ -216,7 +216,9 @@ class Collater(object):
             tones[bid, :text_size] = tone
             input_lengths[bid] = text_size
             output_lengths[bid] = mel_size
-            paths[bid] = int(path.split("/")[-2])
+            
+            if self.return_wave:
+                paths[bid] = int(path.split("/")[-2])
 
             
         if self.return_wave:
