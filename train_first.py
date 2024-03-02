@@ -44,6 +44,7 @@ logger.addHandler(handler)
 @click.command()
 @click.option('-p', '--config_path', default='Configs/config.yml', type=str)
 def main(config_path):
+    print("Training 1st stage")
 
     config = yaml.safe_load(open(config_path))
 

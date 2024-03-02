@@ -62,6 +62,8 @@ logger.addHandler(handler)
 @click.command()
 @click.option('-p', '--config_path', default='Configs/config.yml', type=str)
 def main(config_path):
+    print("Training 2nd stage")
+
 
     config = yaml.safe_load(open(config_path))
 
@@ -142,7 +144,7 @@ def main(config_path):
         model, optimizer, start_epoch, iters = load_checkpoint(model,  optimizer, config['pretrained_model'],
                                     load_only_params=config.get('load_only_params', True), 
                                     load_predictor=config.get('load_predictor', False),
-                                    load_style_encoder=config.get('load_predictor', False),
+                                    load_style_encoder=config.get('load_style_encoder', False),
                                     )
     else:
         start_epoch = 0
@@ -153,7 +155,7 @@ def main(config_path):
             print('Loading the first stage model at %s ...' % first_stage_path)
             model, optimizer, start_epoch, iters = load_checkpoint(model, optimizer, first_stage_path,
                                         load_only_params=True, load_predictor=config.get('load_predictor', False),
-                                    load_style_encoder=config.get('load_predictor', False),
+                                    load_style_encoder=config.get('load_style_encoder', False),
                                         )
         else:
             raise ValueError('You need to specify the path to the first stage model.') 
@@ -445,10 +447,13 @@ def main(config_path):
                         ss.append(s)
                     s = torch.stack(ss).squeeze()
                 
-                d, p = model.predictor(t_en, s, tones,
-                                                    input_lengths, 
-                                                    s2s_attn_mono, 
-                                                    m)
+                
+                d, p = model.predictor(t_en, 
+                                        tones,
+                                        s, 
+                                        input_lengths, 
+                                        s2s_attn_mono, 
+                                        m)
                 # get clips
                 mel_len = int(mel_input_length.min().item() / 2 - 1)
                 en = []
@@ -462,7 +467,6 @@ def main(config_path):
                     random_start = np.random.randint(0, mel_length - mel_len)
                     en.append(asr[bib, :, random_start:random_start+mel_len])
                     p_en.append(p[bib, :, random_start:random_start+mel_len])
-
                     gt.append(mels[bib, :, (random_start * 2):((random_start+mel_len) * 2)])
 
                 en = torch.stack(en)

@@ -1,0 +1,64 @@
+/storageNVME/melissa/aishell3/train/wav/SSB0043/SSB00430444.wav|$ʈʂʰˈʐtɕʰˈi xˈʊŋˈiŋtɕʰˈjɑŋ ʈʂˈweɪkˈan tˈweɪfˈɑŋ pˈankˈʊŋlˈi$|X2222233333 22221111111111 1111113333 444441111 44441111333X|8
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180296.wav|$kˈwɔpˈaˈintˈɤ jˈɛnɥˈɛn jˈoʊʂˈənmˈɤ$|X4444222333555 33332222 22223333555X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570415.wav|$fˈɑŋˈiʂˈoʊ tɕʰˈiŋkˈɤ$|X4444443333 222222111X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800019.wav|$ɕˈjaʊɥˈɛn tɕʰˈiŋʈʂʰˈwən ɕˈjaʊɥˈɛn ɕˈjaʊʂˈwɔjˈoʊʂˈənmˈɤ$|X444442222 1111111111111 444442222 33333111122223333555X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570241.wav|$tˈaʈʂˈʐxˈweɪ ˈasˈɹ tˈakʰˈɤ tʰˈʊŋɕˈynʂˈɤ$|X444444444444 11111 2224444 111114444444X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0033/SSB00330113.wav|$xˈutɕˈjaxˈanɥˈɛ$|X222111114444444X|6
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800207.wav|$pˈjɛtsˈwɔnˈi ˈɚtsˈɹtˈɤ ʈʂʰˈʐɹˈu$|X222244444333 225555555 22222333X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570300.wav|$ʂˈʐtɕˈi tsˈɤʂˈʐtsˈaɪ ˈikˈwɔ tʰˈaɕˈiɑŋ ʂˈʐfˈɑŋ tsʰˈɹtɕʰˈjɛntˈɤ ʈʂˈʊŋjˈa$|X2224444 222244444444 442222 111111111 4444444 333332222222555 44444111X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570073.wav|$ʈʂˈʊŋɥˈɛntɕʰˈi tˈjɛntsˈɹ tɕˈjaʊˈi tɕˈjoʊ kʰˈɤˈi pˈɑŋʈʂˈu nˈʊŋʈʂʰˈanpʰˈin xˈɤlˈi lˈjoʊtˈʊŋ$|X11111333311111 444445555 11111144 444444 222233 11114444 222222222233333 222333 222224444X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0016/SSB00160304.wav|$tʰˈjɛn ʈʂˈʐxˈən$|X111111 11112222X|4
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180057.wav|$pˈaɹˈən wˈeɪ sˈʊŋtsʰˈɹ sˈanʈʂˈʊŋ kˈaʊˈɤ ɕˈyɛʂˈəŋ$|X1112222 2222 111122222 111111111 111144 22221111X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0009/SSB00090249.wav|$kˈəŋʈʂˈʐ ʈʂˈɤʂˈʐ tɕˈjaʈʂˈɑŋ tɕˈi ʂˈɤxˈweɪtˈɤ tsˈɤɹˈən$|X44443333 4444444 1111133333 2222 44444444555 22224444X|1
+/storageNVME/melissa/aishell3/train/wav/SSB0009/SSB00090212.wav|$kʰˈaɪʈʂʰˈɤ mˈanmˈan tɕʰˈjɛnɕˈiŋ$|X1111111111 44444444 22222222222X|1
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800050.wav|$ɕˈiɑŋtʰˈa ʈʂˈɤjˈɑŋtˈɤ wˈeɪɕˈjɛ kʰˈwɑŋ kʰˈɤnˈəŋ xˈaɪlˈɤ pˈuʂˈaʊɹˈən$|X444441111 44444444555 33334444 222222 33332222 4444555 44433332222X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0033/SSB00330350.wav|$kˈwanˈɚtˈɤ tˈjɛnˈiŋ jˈoʊʂˈənmˈɤ$|X1111133555 44444222 33332222555X|6
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800137.wav|$lˈutɕˈiɑŋɕˈjɛn lˈutɕˈiɑŋtˈɤ ʈʂˈʊŋɕˈyɛ jˈoʊʂˈənmˈɤ$|X22211111144444 222111111555 111112222 22223333555X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0016/SSB00160310.wav|$ˈitɕʰˈjɛ tˈoʊ ˈukˈwan tɕˈinjˈaʊlˈɤ$|X22444444 1111 2211111 333334444555X|4
+/storageNVME/melissa/aishell3/train/wav/SSB0016/SSB00160130.wav|$lˈinʈʂˈʐɕˈyɛn ɥˈɛnʈʂʰˈɑŋtˈɤ kˈɤtɕʰˈy jˈoʊʂˈənmˈɤ$|X2222444444444 2222444444555 11122222 33332222555X|4
+/storageNVME/melissa/aishell3/train/wav/SSB0012/SSB00120498.wav|$ʈʂˈaʊjˈɑŋtɕʰˈytˈɤ ɕˈiɑŋʈʂˈəŋ jˈoʊʂˈənmˈɤ$|X11111222211111555 1111144444 33332222222X|3
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570443.wav|$ʈʂˈəŋlˈɤpˈutˈaʊ pˈapˈaɪ kʰˈwaɪtɕʰˈjɛn$|X444445552224444 1113333 4444442222222X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180028.wav|$ˈinxˈɤɕˈi mˈanjˈoʊ tsˈɹnˈan$|X222222444 44442222 33332222X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800161.wav|$tʰˈaʂˈʐ ˈikˈɤ pˈutsʰˈwɔtˈɤ xˈaɪtsˈɹ$|X1111444 22444 222444444555 22225555X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0033/SSB00330355.wav|$kʰˈɤnˈəŋ tɕˈjoʊxˈweɪ fˈaʂˈəŋ ˈiɕˈjɛ ɹˈəntɕˈjɛn tsʰˈantɕˈy$|X33332222 44444444444 1111111 441111 2222111111 3333334444X|6
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180086.wav|$tɕˈiɑŋˈi ʈʂʰˈujˈɛntˈɤ tˈjɛnʂˈʐtɕˈy jˈoʊʂˈənmˈɤ$|X33333344 111113333555 444444444444 22223333555X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800326.wav|$pˈaʂˈʐtɕʰˈisˈweɪ tʰˈjɛnxˈwa ˈɚtsˈɹˈin ˈaɪʈʂˈən tɕʰˈyʂˈʐ ɹˈəntʰˈʊŋ kˈʊŋtsˈwɔxˈoʊ fˈɑŋʂˈən tˈakʰˈu$|X1112221111144444 2222222222 225555111 22244444 44444444 333344444 1111444444444 44441111 4441111X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0043/SSB00430233.wav|$kʰˈɑŋtʰˈan fˈuɹˈən nˈitˈɤ ʈʂˈwɔtsˈɹ$|X1111133333 1112222 333555 111115555X|8
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180006.wav|$lˈwɔmˈatˈɤ ʂˈutɕˈi jˈoʊʂˈənmˈɤ$|X2222333555 1112222 22223333555X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0043/SSB00430110.wav|$wˈɔjˈaʊ xˈwatˈjɛn ʂˈʐtɕˈjɛn ʈʂˈwənpˈeɪ ˈiɕˈja$|X3334444 111133333 222111111 3333334444 224444X|8
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180242.wav|$ɕˈiˈanʂˈʐtˈɤ kˈʊŋɥˈɛn jˈoʊʂˈənmˈɤ$|X111111444555 11112222 22223333555X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0016/SSB00160094.wav|$ɕˈiwˈɑŋ tˈaʊʂˈʐ wˈɔnˈəŋ ʈʂʰˈəŋtˈɤʈʂˈu$|X1114444 4444222 3332222 1111112224444X|4
+/storageNVME/melissa/aishell3/train/wav/SSB0385/SSB03850404.wav|$tˈan ɹˈənlˈi tsˈɹɥˈɛn tsˈwantɕˈja tʰˈiɕˈiŋ$|X4444 2222444 11112222 11111111111 22223333X|44
+/storageNVME/melissa/aishell3/train/wav/SSB0043/SSB00430479.wav|$lˈukʰˈasˈɹ ʂˈwɔ lˈukʰˈasˈɹ ʂˈɑŋkˈwɔ tɕˈjɛnkʰˈɑŋkʰˈɤ$|X2223333111 1111 2223333111 44444444 444444111114444X|8
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180273.wav|$mˈaɪtˈɑŋlˈaʊ ɹˈʐɥˈɛkˈwɑŋtˈjɛn$|X444411112222 4444441111144444X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800376.wav|$nˈi ʈʂˈʐtˈaʊ ʈʂˈɤɕˈjɛ ʂˈutsˈɹtˈɤ ˈiˈimˈa$|X333 11114444 44441111 4444444555 4444555X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0043/SSB00430101.wav|$ʈʂʰˈənʈʂʰˈʊŋʈʂʰˈu jˈɛntˈɤ tˈjɛnˈiŋ jˈoʊʂˈənmˈɤ$|X22222211111111111 3333555 44444222 33332222555X|8
+/storageNVME/melissa/aishell3/train/wav/SSB0033/SSB00330329.wav|$tɕʰˈiŋpˈɑŋwˈɔ pˈa wˈəntˈu tʰˈjaʊʈʂˈəŋtˈaʊ sˈanʂˈʐtˈu$|X3333331111222 333 1111444 222222333334444 1111222444X|6
+/storageNVME/melissa/aishell3/train/wav/SSB0012/SSB00120395.wav|$tsˈwɔ fˈuwˈəŋtˈɤ kˈantɕˈyɛ kʰˈɤʂˈʐ xˈənxˈaʊtˈɤ$|X44444 4441111555 333322222 3333444 22223333555X|3
+/storageNVME/melissa/aishell3/train/wav/SSB0038/SSB00380099.wav|$xˈwaʂˈəŋ lˈwantˈwəntɕˈiɑŋʂˈu tʰˈatsˈaɪ nˈalˈitˈɤ tɕˈjɛnwˈən tɕʰˈyʂˈʐ$|X22224444 4444444444333333444 111144444 444333555 4444442222 44444444X|7
+/storageNVME/melissa/aishell3/train/wav/SSB0038/SSB00380280.wav|$ɹˈɑŋ ɕˈjaʊpˈaɪ ˈjʊŋxˈu tɕˈjoʊnˈəŋ ʂˈəŋʈʂʰˈan$|X4444 333332222 4444444 4444442222 1111333333X|7
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800146.wav|$tsʰˈantɕˈja pˈjaʊjˈɛn ʈʂˈuɕˈiŋtˈɤ tɕˈiŋtˈʊŋ lˈwɔkˈu jˈɛʂˈʐ tʰˈɤtˈjɛn ʂˈʐtsˈu$|X11111111111 222223333 44444444555 111111111 2222333 333444 444433333 2222222X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0011/SSB00110443.wav|$tʰˈjɛɕˈin pˈiɹˈu ʈʂˈʐɥˈɛnʈʂˈɤxˈweɪ tɕʰˈintsˈɹ wˈeɪ wˈansˈaɪtˈɤ tsʰˈansˈaɪʈʂˈɤ tɕˈjɛɕˈinpʰˈjɛn$|X111111111 333222 44444444333344444 1111114444 4444 22224444555 11111144442222 333331111444444X|2
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180450.wav|$tʰˈamˈənʂˈwɔjˈaʊʈʂˈoʊ tɕˈikˈɤɥˈɛtˈɤ fˈalˈy ʂˈoʊɕˈy$|X111155551111444422222 3333444444555 333444 3333444X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0073/SSB00730040.wav|$ʈʂˈaʊwˈeɪtˈɤ kˈɤ$|X444441111555 111X|10
+/storageNVME/melissa/aishell3/train/wav/SSB0009/SSB00090182.wav|$ɕˈiɑŋjˈaʊ ˈɚˈaɪˈɚkʰˈəntˈɤ kˈɤ$|X333334444 444442233333555 111X|1
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800148.wav|$kʰˈəntˈiŋlˈɤ tɕˈinʈʂʰˈwɑŋˈi tɕˈiɑŋtˈɤ xˈɑŋjˈɛ ˈiŋɕˈiɑŋlˈi$|X333334444555 11111444444444 333333555 2222444 22233333444X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0073/SSB00730321.wav|$tˈalˈiɑŋ ʂˈənʈʂˈənkʰˈɤtɕˈinɹˈu tˈʊŋwˈan ʈʂˈʐjˈɛ$|X44444444 111144444444444444444 11113333 4444444X|10
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570288.wav|$tɕʰˈitˈjɛn sˈanlˈiŋsˈɹ$|X1111133333 11112222444X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0038/SSB00380127.wav|$ʈʂʰˈəŋɕˈjɛnʈʂʰˈu mˈoʊʈʂˈʊŋ ʈʂʰˈəŋtˈutˈɤ wˈeɪsˈwɔ tʰˈaɪʂˈʐ$|X2222224444411111 222233333 222222444555 33331111 44444444X|7
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570029.wav|$ˈɚtɕʰˈjɛ ɹˈukˈwɔ tɕˈjaʊˈi sˈwɔtsˈwɔtˈa$|X22333333 2223333 11111144 333344444444X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0038/SSB00380274.wav|$wˈeɪ mˈinfˈantˈjɛn$|X4444 2222444444444X|7
+/storageNVME/melissa/aishell3/train/wav/SSB0011/SSB00110067.wav|$ˈaʊɥˈɛn tsˈoʊɹˈwɔjˈoʊlˈiˈy kˈaʊtˈwan ʂˈʐʈʂʰˈɑŋtˈɤ ɕˈjaʊʂˈoʊ$|X4442222 333334444333344422 111111111 444333333555 111114444X|2
+/storageNVME/melissa/aishell3/train/wav/SSB0038/SSB00380233.wav|$pˈaʊtɕˈjɛnxˈweɪ tʰˈʊŋpˈaʊ wˈeɪkˈweɪ pˈaʊɕˈjɛn tɕˈikˈoʊ$|X333311111144444 111114444 222211111 222233333 11114444X|7
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570068.wav|$jˈoʊˈy ˈɤlˈwɔsˈɹ pˈulˈu jˈɛnʈʂˈʊŋ pˈjɛnʈʂˈʐ$|X222222 222222111 444333 222244444 333332222X|9
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800365.wav|$ˈutˈa jˈɛnɥˈɛn jˈoʊʂˈənmˈɤ$|X22222 33332222 22223333555X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800182.wav|$tˈweɪ pʰˈiŋfˈu fˈənxˈwa tɕʰˈitˈaʊ xˈwantɕˈjɛ tsˈwɔˈjʊŋ$|X44444 22222444 11114444 333334444 2222233333 444444444X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0080/SSB00800188.wav|$tˈiˈikˈɤ tsˈwɔpʰˈin$|X44422444 4444433333X|11
+/storageNVME/melissa/aishell3/train/wav/SSB0012/SSB00120234.wav|$nˈukʰˈasˈɹ ʂˈʐ ˈulˈintˈɤmˈa$|X2223333111 444 223333555555X|3
+/storageNVME/melissa/aishell3/train/wav/SSB0005/SSB00050282.wav|$kˈaɪ tɕʰˈyˈykˈwɔtɕʰˈy ˈinwˈeɪ tɕˈjaʊtʰˈʊŋ xˈɤ pʰˈeɪtʰˈaʊ lˈwɔxˈoʊˈɚ pˈuʂˈoʊ ʈʂˈʊŋʂˈʐ$|X1111 1111144444444444 1112222 11111111111 222 4444444444 4444444422 2224444 44444555X|0
+/storageNVME/melissa/aishell3/train/wav/SSB0012/SSB00120057.wav|$ɕˈinsˈɹlˈantˈɤ tˈʊŋˈu jˈoʊʂˈənmˈɤ$|X11111112222555 444444 33332222555X|3
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180247.wav|$tɕˈjoʊlˈjoʊ sˈɑŋ xˈaɪtʰˈan$|X33333344444 4444 333311111X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0018/SSB00180157.wav|$jˈɛtɕˈjakʰˈɤ kʰˈwənʈʂʰˈʊŋ jˈoʊʂˈənmˈɤ$|X444333331111 111111222222 22223333555X|5
+/storageNVME/melissa/aishell3/train/wav/SSB0011/SSB00110230.wav|$tɕˈinkˈwan lˈitɕˈjaʈʂʰˈəŋ tsˈaɪsˈan tɕʰˈjɑŋtˈjaʊpˈuxˈweɪ tɕʰˈjɛntsʰˈɤ$|X4444422222 33311111222222 444441111 22222224444422244444 111111144444X|2
+/storageNVME/melissa/aishell3/train/wav/SSB0033/SSB00330125.wav|$xˈəŋlˈitˈɤ ˈɚtsˈɹ tˈɑŋʂˈʐ tsˈaɪʈʂʰˈɑŋmˈa$|X1111444555 223333 1111222 44444333333555X|6
+/storageNVME/melissa/aishell3/train/wav/SSB0057/SSB00570120.wav|$ˈɚɕˈjɛn ʈʂʰˈəŋʂˈʐ tʰˈutˈi ʈʂʰˈəŋtɕˈjaʊ pʰˈiŋtɕˈyn ˈitɕˈjalˈypˈaɪfˈən ʈʂˈʐtɕʰˈi$|X4444444 222222444 3333444 222222111111 2222211111 444444444433331111 111111111X|9
