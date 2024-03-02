@@ -165,8 +165,14 @@ class GTRStyleEncoder(nn.Module):
         self.t_embedding = nn.Embedding(6, style_dim)
         self.r_embedding = nn.Embedding(7, style_dim)
 
-        self.fc1 = nn.Linear(style_dim * 3, (out_dim + style_dim * 3) // 2)
-        self.fc2 = nn.Linear((out_dim + style_dim * 3) // 2, out_dim)
+        # self.fc1 = nn.Linear(style_dim * 3, (out_dim + style_dim * 3) // 2)
+        # self.fc2 = nn.Linear((out_dim + style_dim * 3) // 2, out_dim)
+        # self.fc = nn.Linear(style_dim * 3, out_dim)
+        self.fc = nn.Linear(style_dim * 3, out_dim)
+        self.relu = nn.ReLU()
+        # self.lstm = nn.LSTM(style_dim * 3, 512, num_layers=1, batch_first=True)
+        # self.fc = nn.Linear(512, out_dim)
+
 
     def forward(self, x):
         r = x % 10
@@ -178,8 +184,14 @@ class GTRStyleEncoder(nn.Module):
         r_embeded = self.r_embedding(r)
         
         s = torch.cat([g_embeded, t_embeded, r_embeded], axis=1)
-        s = self.fc1(s)
-        s = self.fc2(s)
+        # print(s.shape)
+        # s = self.fc1(s)
+        # s = self.fc2(s)
+        # s = self.relu(self.lstm(s))
+        # s, _ = self.lstm(s.unsqueeze(1))
+        # s = self.fc(s)
+        # s = self.relu(self.sfc2(self.fc1(s)))
+        s = self.relu(self.fc(s))
 
         return s
     

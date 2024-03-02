@@ -5,30 +5,32 @@ from torch.utils.data import DataLoader
 
 from munch import Munch
 import yaml
-from models import build_model, GTRStyleEncoder
+from utils import *
+from models import build_model, GTRStyleEncoder, StyleEncoder
 from meldataset import build_dataloader
+from tqdm import tqdm
 
 
 def main():
-    ckpt_path = "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_s2/libritts_aishell3_s1-epoch_1st_00016.pth"
-    train_list = "Data/gtr_train.txt"
-    val_list = "Data/gtr_test.txt"
+    ckpt_path = "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_s1/epoch_1st_00016.pth"
+    train_path = "Data/gtr_train.txt"
+    val_path = "Data/gtr_test.txt"
     device = "cuda:0"
     batch_size = 16
     num_epochs = 1000
-    config_path = "/home/melissa/ArtiVoice-GTR/Configs/config_1st.yml"
-    config = yaml.safe_load(open(config_path))
+    # config_path = "/home/melissa/ArtiVoice-GTR/Configs/config_1st.yml"
+    # config = yaml.safe_load(open(config_path))
 
-    model = build_model(Munch(config['model_params']), text_aligner=None, pitch_extractor=None)
-    style_encoder = model.style_encoder
+    # model = build_model(Munch(config['model_params']), text_aligner=None, pitch_extractor=None)
+    # style_encoder = model.style_encoder
+    style_encoder = StyleEncoder(dim_in=64, style_dim=128, max_conv_dim=512)
     gtr_encoder = GTRStyleEncoder(out_dim=128, style_dim=128)
 
     state = torch.load(ckpt_path, map_location='cpu')
-    params = state['net']
-    for key in model:
-        if key in params:
-            if key == "style_encoder":
-                style_encoder[key].load_state_dict(params[key])
+    style_encoder.load_state_dict(state['net']["style_encoder"])
+
+    style_encoder = style_encoder.to(device)
+    gtr_encoder = gtr_encoder.to(device)
     
     criterion = nn.MSELoss()
 
@@ -36,6 +38,7 @@ def main():
     optimizer = optim.Adam(gtr_encoder.parameters(), lr=0.001)
 
     # Define your dataset and dataloader
+    train_list, val_list = get_data_path_list(train_path, val_path)
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
                                         num_workers=8,
@@ -55,14 +58,24 @@ def main():
     for epoch in range(num_epochs):
         gtr_encoder.train()
         running_loss = 0.0
-        for i, batch in enumerate(train_dataloader):
+        for i, batch in tqdm(enumerate(train_dataloader)):
             paths, texts, input_lengths, mels, mel_input_length, tones = batch
             paths = paths.to(device)
+            mels = mels.to(device)
+            mel_input_length = mel_input_length.to(device)
 
             optimizer.zero_grad()
             
             with torch.no_grad():
-                pretrained_outputs = style_encoder(paths)
+                gt = []
+                mel_len = int(mel_input_length.min().item() / 2 - 1)
+                for bib in range(len(mel_input_length)):
+                    mel_length = int(mel_input_length[bib].item() / 2)
+
+                    random_start = np.random.randint(0, mel_length - mel_len)
+                    gt.append(mels[bib, :, (random_start * 2):((random_start+mel_len) * 2)])
+                gt = torch.stack(gt).detach()
+                pretrained_outputs = style_encoder(gt.unsqueeze(1))
             
             second_outputs = gtr_encoder(paths)
             

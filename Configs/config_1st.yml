@@ -1,19 +1,19 @@
-log_dir: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1"
-first_stage_path: ""
+log_dir: "/storageNVME/melissa/ckpts/stylettsCN/gtr_s1"
+first_stage_path: "first_stage.pth"
 
-save_freq: 10
+save_freq: 2
 log_interval: 10
 device: "cuda"
 multigpu: false
 epochs_1st: 1000 # number of epochs for first stage training
 epochs_2nd: 100 # number of peochs for second stage training
-batch_size: 32
-pretrained_model: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1/epoch_1st_00198.pth"
-# pretrained_model: ""
+batch_size: 2
+# pretrained_model: "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_gtr_s1/epoch_1st_00198.pth"
+pretrained_model: "/storageNVME/melissa/ckpts/stylettsCN/gtr_s1/epoch_1st_00080.pth"
 second_stage_load_pretrained: false # set to true if the pre-trained model is for 2nd stage
 load_only_params: false # set to true if do not want to load epoch numbers and optimizer parametersr
 load_predictor: false
-load_style_encoder: true
+load_style_encoder: false
 
 train_data: "Data/gtr_train.txt"
 val_data: "Data/gtr_test.txt"
@@ -32,7 +32,7 @@ preprocess_params:
 model_params:
   gtr_condition: true
   hidden_dim: 512
-  n_token: 178
+  n_token: 185
   style_dim: 128
   n_layer: 3
   dim_in: 64
@@ -48,7 +48,7 @@ loss_params:
     
     lambda_mono: 1. # monotonic alignment loss (1st stage, TMA)
     lambda_s2s: 1. # sequence-to-sequence loss (1st stage, TMA)
-    TMA_epoch: 0 # TMA starting epoch (1st stage), start from epoch > TMA_epoch
+    TMA_epoch: 5 # TMA starting epoch (1st stage), start from epoch > TMA_epoch
 
     # https://github.com/yl4579/StyleTTS/issues/7
     TMA_CEloss: false # whether to use cross-entropy (CE) loss for TMA

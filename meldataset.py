@@ -26,9 +26,10 @@ _pad = "$"
 _punctuation = ';:,.!?¡¿—…"«»“” '
 _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 _letters_ipa = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ"
+_tones = "12345 X"
 
 # Export all symbols:
-symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa)
+symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa) + list(_tones)
 
 dicts = {}
 for i in range(len((symbols))):
@@ -120,7 +121,6 @@ class FilePathDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         data = self.data_list[idx]
         path = data[0]
-
         wave, text_tensor, tone_tensor, speaker_id = self._load_tensor(data)
         # wave, text_tensor, speaker_id = self._load_tensor(data)
 
@@ -147,7 +147,8 @@ class FilePathDataset(torch.utils.data.Dataset):
         wave = np.concatenate([np.zeros([5000]), wave, np.zeros([5000])], axis=0)
 
         text = self.text_cleaner(text)
-        tone = self.text_cleaner4tones(tone)
+        # tone = self.text_cleaner4tones(tone)
+        tone = self.text_cleaner(tone)
 
         text.insert(0, 0)
         text.append(0)

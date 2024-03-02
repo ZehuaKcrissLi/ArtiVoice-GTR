@@ -221,8 +221,8 @@ def main(config_path):
             # reconstruction
             mel_rec = model.decoder(en, F0_real, real_norm, s)
 
-            # np.save("./synth/libritts_aishell3_s1-epoch_1st_00016-mel_rec.npy", mel_rec.cpu().detach().numpy())
-            # np.save("./synth/libritts_aishell3_s1-epoch_1st_00016-gt.npy", gt.cpu().detach().numpy())
+            # np.save("./synth/gtr_s1-epoch_1st_00080-mel_rec.npy", mel_rec.cpu().detach().numpy())
+            # np.save("./synth/gtr_s1-epoch_1st_00080-gt.npy", gt.cpu().detach().numpy())
             # exit()
 
             # discriminator loss
@@ -369,7 +369,7 @@ def main(config_path):
             if gtr_condition:
                 s = model.style_encoder(paths)
             else:
-                s = model.fstyle_encoder(gt.unsqueeze(1))
+                s = model.style_encoder(gt.unsqueeze(1))
             real_norm = log_norm(gt.unsqueeze(1)).squeeze(1)
             mel_rec = model.decoder(en, F0_real, real_norm, s)
             mel_rec = mel_rec[..., :gt.shape[-1]]
