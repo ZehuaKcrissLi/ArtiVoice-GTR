@@ -75,6 +75,8 @@ def main(config_path):
 
     if gtr_condition:
         collate_config = {"return_wave": True}
+    else:
+        collate_config = {}
 
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
