@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 def main():
-    ckpt_path = "/storageNVME/melissa/ckpts/stylettsCN/libritts_aishell3_s1/epoch_1st_00016.pth"
+    ckpt_path = "/storageNVME/melissa/ckpts/stylettsCN/pretrained/Models/libritts/epoch_2nd_00050.pth"
     train_path = "Data/gtr_train.txt"
     val_path = "Data/gtr_test.txt"
     device = "cuda:0"
@@ -24,7 +24,7 @@ def main():
     # model = build_model(Munch(config['model_params']), text_aligner=None, pitch_extractor=None)
     # style_encoder = model.style_encoder
     style_encoder = StyleEncoder(dim_in=64, style_dim=128, max_conv_dim=512)
-    gtr_encoder = GTRStyleEncoder(out_dim=128, style_dim=128)
+    gtr_encoder = GTRStyleEncoder(out_dim=128, style_dim=7)
 
     state = torch.load(ckpt_path, map_location='cpu')
     style_encoder.load_state_dict(state['net']["style_encoder"])
