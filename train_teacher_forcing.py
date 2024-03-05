@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
+import os
+import pickle
 from munch import Munch
 import yaml
 from utils import *
@@ -11,33 +13,68 @@ from meldataset import build_dataloader
 from tqdm import tqdm
 
 
-def main():
-    ckpt_path = "/storageNVME/melissa/ckpts/stylettsCN/pretrained/Models/libritts/epoch_2nd_00050.pth"
-    train_path = "Data/gtr_train.txt"
-    val_path = "Data/gtr_test.txt"
-    device = "cuda:0"
-    batch_size = 16
-    num_epochs = 1000
-    # config_path = "/home/melissa/ArtiVoice-GTR/Configs/config_1st.yml"
-    # config = yaml.safe_load(open(config_path))
+to_mel = torchaudio.transforms.MelSpectrogram(
+    n_mels=80, n_fft=2048, win_length=1200, hop_length=300)
+mean, std = -4, 4
 
-    # model = build_model(Munch(config['model_params']), text_aligner=None, pitch_extractor=None)
-    # style_encoder = model.style_encoder
+
+def preprocess(wave):
+    wave_tensor = torch.from_numpy(wave).float()
+    mel_tensor = to_mel(wave_tensor)
+    mel_tensor = (torch.log(1e-5 + mel_tensor.unsqueeze(0)) - mean) / std
+    return mel_tensor
+
+
+def compute_pretrained_style(ckpt_path="/storageNVME/melissa/ckpts/stylettsCN/pretrained/Models/libritts/epoch_2nd_00050.pth", 
+                                   device="cpu", 
+                                   filelist="Data/gtr_train.txt"):
     style_encoder = StyleEncoder(dim_in=64, style_dim=128, max_conv_dim=512)
-    gtr_encoder = GTRStyleEncoder(out_dim=128, style_dim=7)
-
     state = torch.load(ckpt_path, map_location='cpu')
     style_encoder.load_state_dict(state['net']["style_encoder"])
-
     style_encoder = style_encoder.to(device)
-    gtr_encoder = gtr_encoder.to(device)
+
+    reference_embeddings = {}
+
+    with open(filelist, "r") as f:
+        for _, path in tqdm(enumerate(f), total=2500):
+            path = path.strip().split("|")[0]
+            wave, sr = librosa.load(path, sr=24000)
+            audio, index = librosa.effects.trim(wave, top_db=30)
+            if sr != 24000:
+                audio = librosa.resample(audio, sr, 24000)
+            mel_tensor = preprocess(audio).to(device)
+            try:
+                with torch.no_grad():
+                    ref = style_encoder(mel_tensor.unsqueeze(1))
+                path_s = path.split("/")
+                utt_id = "_".join([path_s[-2], path_s[-1].split(".")[0]])
+                reference_embeddings[utt_id] = ref.squeeze(1).cpu().numpy()
+            except Exception as e:
+                print(e)
+        return reference_embeddings
+
+
+def main():
+    train_path = "Data/gtr_train.txt"
+    val_path = "Data/gtr_test.txt"
+    device = "cuda:3"
+    batch_size = 128
+    num_epochs = 1000
+    style_embed_file = "/home/melissa/ArtiVoice-GTR/Data/pretrained_style_embeddings.pkl"
+
+    if os.path.exists(style_embed_file):
+        pretrained_outputs_map = pickle.load(open(style_embed_file, "rb"))
+    else:
+        pretrained_outputs_map = compute_pretrained_style(device=device, filelist=train_path)
+        with open(style_embed_file, "wb") as f:
+            pickle.dump(pretrained_outputs_map, f)
+
+    gtr_encoder = GTRStyleEncoder(out_dim=128, style_dim=7).to(device)
+    print(gtr_encoder)
     
     criterion = nn.MSELoss()
-
-    # Define optimizer
     optimizer = optim.Adam(gtr_encoder.parameters(), lr=0.001)
 
-    # Define your dataset and dataloader
     train_list, val_list = get_data_path_list(train_path, val_path)
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
@@ -54,40 +91,38 @@ def main():
                                       collate_config={"return_wave": True},
                                       dataset_config={})
 
-    # Training loop
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs), total=num_epochs):
         gtr_encoder.train()
         running_loss = 0.0
-        for i, batch in tqdm(enumerate(train_dataloader)):
+        num_utts = 0
+        for i, batch in enumerate(train_dataloader):
             paths, texts, input_lengths, mels, mel_input_length, tones = batch
-            paths = paths.to(device)
             mels = mels.to(device)
             mel_input_length = mel_input_length.to(device)
 
             optimizer.zero_grad()
-            
-            with torch.no_grad():
-                gt = []
-                mel_len = int(mel_input_length.min().item() / 2 - 1)
-                for bib in range(len(mel_input_length)):
-                    mel_length = int(mel_input_length[bib].item() / 2)
 
-                    random_start = np.random.randint(0, mel_length - mel_len)
-                    gt.append(mels[bib, :, (random_start * 2):((random_start+mel_len) * 2)])
-                gt = torch.stack(gt).detach()
-                pretrained_outputs = style_encoder(gt.unsqueeze(1))
+            pretrained_outputs = []
+            paths_ints = torch.zeros(batch_size).long()
+            for i, path in enumerate(paths):
+                path_s = path.split("/")
+                paths_ints[i] = int(path_s[-2])
+                utt_id = "_".join([path_s[-2], path_s[-1].split(".")[0]])
+                pretrained_outputs.append(pretrained_outputs_map[utt_id])
             
-            second_outputs = gtr_encoder(paths)
+            pretrained_outputs = torch.from_numpy(np.stack(pretrained_outputs)).to(device)
+            paths_ints = paths_ints.to(device)
+            gtr_output = gtr_encoder(paths_ints)
             
-            loss = criterion(second_outputs, pretrained_outputs)
+            loss = criterion(gtr_output, pretrained_outputs.squeeze(1))
             
-            # Backward pass
             loss.backward()
             optimizer.step()
             
-            running_loss += loss.item() * paths.size(0)
+            running_loss += loss.item() * paths_ints.size(0)
+            num_utts += paths_ints.size(0)
 
-        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss:.4f}')
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss / num_utts:.4f}')
 
     print('Training finished')
 
