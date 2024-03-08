@@ -1,6 +1,7 @@
 __pychache__/*
 Models/*
 synth/*
+wandb/*
 
 picked_sliced/
 *.0

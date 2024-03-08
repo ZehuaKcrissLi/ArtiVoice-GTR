@@ -205,8 +205,8 @@ class Collater(object):
         tones = torch.zeros((batch_size, max_text_length)).long()
         input_lengths = torch.zeros(batch_size).long()
         output_lengths = torch.zeros(batch_size).long()
-        paths = ['' for _ in range(batch_size)]
-        # paths = torch.zeros(batch_size).long()  # gtr conditioning as int
+        paths = torch.zeros(batch_size).long()  # gtr conditioning as int
+        # paths = ['' for _ in range(batch_size)]
 
         
         for bid, (label, mel, text, tone, path) in enumerate(batch):
@@ -219,8 +219,8 @@ class Collater(object):
             output_lengths[bid] = mel_size
             
             if self.return_wave:
-                # paths[bid] = int(path.split("/")[-2])
-                paths[bid] = path
+                paths[bid] = int(path.split("/")[-2])
+                # paths[bid] = path
 
             
         if self.return_wave:

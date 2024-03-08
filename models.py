@@ -158,32 +158,108 @@ class StyleEncoder(nn.Module):
         return s
 
 
-class GTRStyleEncoder(nn.Module):
-    def __init__(self, out_dim=128, style_dim=128):
-        super().__init__()
-        self.g_embedding = nn.Embedding(5, style_dim)
-        self.t_embedding = nn.Embedding(6, style_dim)
-        self.r_embedding = nn.Embedding(7, style_dim)
+class GTRStyleEncoder3(nn.Module):
+    def __init__(self, out_dim=128, style_dim=8):
+        super(GTRStyleEncoder3, self).__init__()
 
+        self.r_embedding = nn.Embedding(num_embeddings=7, embedding_dim=style_dim) # 0-indexing
+        
+        self.fc1 = nn.Linear(2 + style_dim, 64)
+        self.bn1 = nn.BatchNorm1d(64)
+        
+        self.fc2 = nn.Linear(64, 128)
+        self.bn2 = nn.BatchNorm1d(128)
+        
+        self.fc3 = nn.Linear(128, 256)
+        self.bn3 = nn.BatchNorm1d(256)
+        self.dropout = nn.Dropout(p=0.2)
+        
+        self.fc4 = nn.Linear(256, out_dim)
 
-        # self.fc1 = nn.Linear(style_dim * 3, (out_dim + style_dim * 3) // 2)
-        # self.fc2 = nn.Linear((out_dim + style_dim * 3) // 2, out_dim)
-        self.fc = nn.Linear(style_dim * 3, out_dim)
+        # Initialize weights (for layers that need it)
+        self._initialize_weights()
 
-        self.relu = nn.ReLU()
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
 
     def forward(self, x):
         r = x % 10
         t = (x // 10) % 10
         g = (x // 100) % 10
 
+        # Embedding for the categorical feature
+        x_embedded = self.r_embedding(g)
+        
+        # Concatenate embedded categorical feature with continuous features
+        x = torch.cat([x_embedded, t.unsqueeze(1), r.unsqueeze(1)], dim=1)
+        
+        x = F.relu(self.bn1(self.fc1(x)))
+        x = F.relu(self.bn2(self.fc2(x)))
+        x = F.relu(self.bn3(self.fc3(x)))
+        x = self.dropout(x)
+        x = self.fc4(x)
+        return x
+
+
+
+class GTRStyleEncoder(nn.Module):
+    def __init__(self, out_dim=128, style_dim=4):
+        super().__init__()
+        self.g_embedding = nn.Embedding(5, style_dim)
+        self.t_embedding = nn.Embedding(6, style_dim)
+        self.r_embedding = nn.Embedding(7, style_dim)
+
+        self.lstm = nn.LSTM(style_dim * 3, out_dim, num_layers=2, batch_first=True, bidirectional=False),
+        self.lstm_fc = nn.Linear(out_dim // 2, out_dim),
+        
+        # # v0, style_dim = 7
+        # self.fc_sequnetial = nn.Sequential(
+        #     nn.Linear(style_dim * 3, (out_dim + style_dim * 3) // 2),
+        #     nn.ReLU(),
+        #     nn.Linear((out_dim + style_dim * 3) // 2, out_dim),
+        # )
+
+        # v1, style_dim = 4
+        self.fc_sequnetial = nn.Sequential(
+            nn.Linear(12, 48),
+            nn.ReLU(),
+            nn.Linear(48, 96),
+            nn.ReLU(),
+            nn.Linear(96, 128),
+        )
+
+        # v2, style_dim = 5
+        # self.fc_sequnetial = nn.Sequential(
+        #     nn.Linear(15, 75),
+        #     nn.ReLU(),
+        #     nn.Linear(75, 375),
+        #     nn.ReLU(),
+        #     nn.Linear(375, 128),
+        # )
+
+
+    def forward(self, x):
+        r = x % 10
+        t = (x // 10) % 10
+        g = (x // 100) % 10
+
+
         g_embeded = self.g_embedding(g)
         t_embeded = self.t_embedding(t)
         r_embeded = self.r_embedding(r)
         
-        s = torch.cat([g_embeded, t_embeded, r_embeded], axis=1)
+        x = torch.cat([g_embeded, t_embeded, r_embeded], axis=1)
         
-        s = self.relu(self.fc(s))
+        s = self.fc_sequnetial(x)
+
+        # self.lstm.flatten_parameters()  
+        # x = x.unsqueeze(1)          
+        # lstm_out, _ = self.lstm(x)
+        # s = self.lstm_fc(lstm_out.squeeze(1))
+        # norm = s.norm(p=2, dim=-1, keepdim=True) 
+        # s = s.div(norm)
 
         return s
     
@@ -848,3 +924,11 @@ def load_checkpoint(model, optimizer, path, load_only_params=True, load_predicto
         iters = 0
         
     return model, optimizer, epoch, iters
+
+
+if __name__ == "__main__":
+    e = GTRStyleEncoder().to('cuda:2')
+    style_encoder_params = torch.load("/storageNVME/melissa/ckpts/stylettsCN/pretrained/gtr_encoder_v1_500.pth", map_location='cpu')
+    e.load_state_dict(style_encoder_params)
+    x = torch.tensor([123]).to('cuda:2')
+    print(e(x))
