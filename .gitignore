@@ -1,4 +1,7 @@
+wandb/*
+synth/*
 picked_sliced/
+acoustic_gtr/.ipynb_checkpoints/*
 *.0
 *.pth
 *.pyc

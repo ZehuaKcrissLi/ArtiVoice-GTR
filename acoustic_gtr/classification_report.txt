@@ -1,0 +1,28 @@
+Train set report:
+              precision    recall  f1-score   support
+
+           0       1.00      0.50      0.67         4
+           1       0.91      0.74      0.82        27
+           2       0.61      0.96      0.74        24
+           3       1.00      0.82      0.90        22
+           4       0.95      0.83      0.88        23
+
+    accuracy                           0.82       100
+   macro avg       0.89      0.77      0.80       100
+weighted avg       0.87      0.82      0.83       100
+
+
+Test set report:
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00         1
+           1       0.60      1.00      0.75         3
+           2       0.62      0.83      0.71         6
+           3       0.67      0.50      0.57         8
+           4       0.83      0.71      0.77         7
+
+    accuracy                           0.68        25
+   macro avg       0.55      0.61      0.56        25
+weighted avg       0.67      0.68      0.66        25
+
+
