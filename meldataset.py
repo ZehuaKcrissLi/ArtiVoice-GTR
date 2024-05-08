@@ -26,10 +26,9 @@ _pad = "$"
 _punctuation = ';:,.!?¡¿—…"«»“” '
 _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 _letters_ipa = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ"
-_tones = "12345 X"
 
 # Export all symbols:
-symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa) + list(_tones)
+symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa)
 
 dicts = {}
 for i in range(len((symbols))):
@@ -148,7 +147,8 @@ class FilePathDataset(torch.utils.data.Dataset):
 
         text = self.text_cleaner(text)
         # tone = self.text_cleaner4tones(tone)
-        tone = self.text_cleaner(tone)
+        # tone = self.text_cleaner(tone)
+        tone = self.text_cleaner4tones(tone)
 
         text.insert(0, 0)
         text.append(0)
@@ -243,9 +243,10 @@ def build_dataloader(path_list,
     data_loader = DataLoader(dataset,
                              batch_size=batch_size,
                              shuffle=(not validation),
-                             num_workers=num_workers,
+                            #  num_workers=num_workers,
                              drop_last=(not validation),
                              collate_fn=collate_fn,
-                             pin_memory=(device != 'cpu'),)
+                            #  pin_memory=(device != 'cpu'),
+                             )
 
     return data_loader

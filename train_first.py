@@ -49,7 +49,8 @@ def main(config_path):
     config = yaml.safe_load(open(config_path))
 
     log_dir = config['log_dir']
-    if not osp.exists(log_dir): os.makedirs(log_dir, exist_ok=True)
+    if not osp.exists(log_dir): 
+        os.makedirs(log_dir, exist_ok=True)
     shutil.copy(config_path, osp.join(log_dir, osp.basename(config_path)))
     writer = SummaryWriter(log_dir + "/tensorboard")
 
@@ -107,7 +108,7 @@ def main(config_path):
         "epochs": epochs,
         "steps_per_epoch": len(train_dataloader),
     }
-
+    
     model = build_model(Munch(config['model_params']), text_aligner, pitch_extractor)
 
     _ = [model[key].to(device) for key in model]
@@ -211,6 +212,7 @@ def main(config_path):
                 continue
 
             real_norm = log_norm(gt.unsqueeze(1)).squeeze(1).detach()
+
             F0_real, _, _ = model.pitch_extractor(gt.unsqueeze(1))
             if gtr_condition:
                 s = model.style_encoder(paths)
@@ -219,6 +221,7 @@ def main(config_path):
             # print(s.shape) torch.Size([2, 384])
 
             # reconstruction
+            
             mel_rec = model.decoder(en, F0_real, real_norm, s)
 
             # np.save("./synth/gtr_s1-epoch_1st_00080-mel_rec.npy", mel_rec.cpu().detach().numpy())
@@ -371,6 +374,9 @@ def main(config_path):
             else:
                 s = model.style_encoder(gt.unsqueeze(1))
             real_norm = log_norm(gt.unsqueeze(1)).squeeze(1)
+            # F0_real do not have a batch dimension, then we need to expand it
+            if len(F0_real.shape) == 1:
+                F0_real = F0_real.unsqueeze(0)
             mel_rec = model.decoder(en, F0_real, real_norm, s)
             mel_rec = mel_rec[..., :gt.shape[-1]]
 

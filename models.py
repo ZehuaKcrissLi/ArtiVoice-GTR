@@ -911,14 +911,21 @@ def load_checkpoint(model, optimizer, path, load_only_params=True, load_predicto
             if key == "style_encoder" and load_style_encoder is False:
                 print('%s is NOT loaded' % key)
                 continue
-            model[key].load_state_dict(params[key])
-            print('%s loaded' % key)
+            try:
+                model[key].load_state_dict(params[key])
+                print('%s loaded' % key)
+            except:
+                print(f"Failed to load {key}")
     _ = [model[key].eval() for key in model]
     
     if not load_only_params:
-        epoch = state["epoch"]
-        iters = state["iters"]
-        optimizer.load_state_dict(state["optimizer"])
+        try:
+            optimizer.load_state_dict(state["optimizer"])
+            epoch = state["epoch"]
+            iters = state["iters"]
+        except:
+            epoch = 0
+            iters = 0
     else:
         epoch = 0
         iters = 0

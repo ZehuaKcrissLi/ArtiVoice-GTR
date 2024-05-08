@@ -123,12 +123,13 @@ class ASRS2S(nn.Module):
         """
         self.initialize_decoder_states(memory, memory_mask)
         # text random mask
-        random_mask = (torch.rand(text_input.shape) < self.random_mask).to(text_input.device)
+        random_mask = (torch.rand(text_input.shape) < self.random_mask).to('cuda')
         _text_input = text_input.clone()
         _text_input.masked_fill_(random_mask, self.unk_index)
         decoder_inputs = self.embedding(_text_input).transpose(0, 1) # -> [T, B, channel]
+
         start_embedding = self.embedding(
-            torch.LongTensor([self.sos]*decoder_inputs.size(1)).to(decoder_inputs.device))
+            torch.LongTensor([self.sos]*decoder_inputs.size(1)).to('cuda:0'))
         decoder_inputs = torch.cat((start_embedding.unsqueeze(0), decoder_inputs), dim=0)
 
         hidden_outputs, logit_outputs, alignments = [], [], []
