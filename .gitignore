@@ -25,3 +25,10 @@ audio-slicer/*
 /home/kcriss/artivoice/label_verification/*
 label_verification/label_verify.csv
 label_verification/label_verify.ipynb
+
+test
+train
+Demo
+ckpts
+data_aishell3.tgz
+
